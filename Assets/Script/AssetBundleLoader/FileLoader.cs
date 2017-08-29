@@ -5,10 +5,9 @@ using UnityEngine;
 
 public class FileLoader : MonoBehaviour{
 	private static string path;
-    private Dictionary<string, Request> loadingList;
+    private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
     private AssetBundleManifest abManifest;
     public void Awake(){
-        loadingList = new Dictionary<string, Request>();
         path = Application.streamingAssetsPath;
         loadManifest();
     }
@@ -30,6 +29,7 @@ public class FileLoader : MonoBehaviour{
     }
     public void Load(string name, System.Action<Object> onComplete)
     {
+        print(loadingList);
         //是否正在加载
         if (loadingList.ContainsKey(name)) {
             return;
