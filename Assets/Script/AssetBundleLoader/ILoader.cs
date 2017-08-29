@@ -7,5 +7,5 @@ using UnityEngine;
  */
 
 public abstract class ILoader{
-	public abstract IEnumerator LoadAssets (Request request,Transform parent);
+	public abstract IEnumerator LoadAssets (Request request);
 }
