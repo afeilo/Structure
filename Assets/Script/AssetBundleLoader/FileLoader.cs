@@ -22,8 +22,9 @@ public class FileLoader : MonoBehaviour{
         System.GC.Collect();
     }
     public void Load(string name) {
+		MLog.D("Load = " + name);
         Load(name, o => {
-            print("instantiate");
+			MLog.D("instantiate");
             Instantiate(o as GameObject);
         });
     }
@@ -50,9 +51,6 @@ public class FileLoader : MonoBehaviour{
         }
         addRequest(name, null, dependecies,onComplete);
 	}
-    public void Load(Request request) { 
-        
-    }
 
     //构建Request
     private void addRequest(string name,string path,string[] dependencice){
@@ -74,7 +72,7 @@ public class FileLoader : MonoBehaviour{
     //加载完成
     private void finishLoad(bool manual,string name)
     {
-        print("finishload = " + name);
+		MLog.D("finishload = " + name);
         if (!manual) {
             Request request;
             loadingList.TryGetValue(name, out request);

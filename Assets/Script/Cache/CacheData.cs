@@ -5,7 +5,19 @@ using System.Text;
 
 public class CacheData<T>
 {
-    public int references;
+	private int realReferences = 0;
+	public int references{
+		get{ 
+			return realReferences;
+		}
+		set{
+			if (value >= 0)
+				realReferences ++;
+			else
+				realReferences --;
+//			MLog.D (""+value);
+		}
+	}
     public T cache;
     public string[] dependencies;
 }

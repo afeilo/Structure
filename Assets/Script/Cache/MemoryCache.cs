@@ -40,7 +40,7 @@ public class MemoryCache : ICache<string, CacheData<Object>>
             var dependence = Get(dependencies[i]);
             if (dependence != null)
             {
-                dependence.references--;
+				dependence.references= 1;
             }
             else
             {
@@ -63,7 +63,7 @@ public class MemoryCache : ICache<string, CacheData<Object>>
             var cache = Get(dependencies[i]);
             if (cache != null)
             {
-                cache.references++;
+				cache.references =  -1;
             }
             else {
                 MLog.E("dependencies can't loaded normally");
