@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.Script.Cache
+public abstract class ICache<K,V>
 {
-    public abstract class ICache<K,V>
-    {
-        protected IDictionary<K, V> caches;
         /**
          * 初始化
          */
@@ -24,30 +21,13 @@ namespace Assets.Script.Cache
         /**
          * 添加数据
          */
-        public virtual void Add(K key, V value) {
-            if (!checkNull()) {
-                return;
-            }
-            caches.Add(key,value);
-        }
+        public abstract void Add(K key,V value);
         /**
          * 获取数据
-         */ 
-        public virtual V Get(K key)
-        {
-            if (!checkNull())
-                return default(V);
-            V value;
-            caches.TryGetValue(key, out value);
-            return value;
-        }
+         */
+        public abstract V Get(K key);
         /**
          * 删除数据
          */ 
         public abstract void Remove(K key);
-
-        protected bool checkNull() {
-            return caches != null;
-        }
-    }
 }

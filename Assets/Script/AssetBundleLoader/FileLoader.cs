@@ -24,7 +24,7 @@ public class FileLoader : MonoBehaviour{
     public void Load(string name) {
         Load(name, o => {
             print("instantiate");
-            Instantiate(o);
+            Instantiate(o as GameObject);
         });
     }
     public void Load(string name, System.Action<Object> onComplete)
@@ -35,11 +35,11 @@ public class FileLoader : MonoBehaviour{
             return;
         }
         //缓存获取
-        Request request = MemoryCache.GetInstance().Get(name);
-        if (request != null)
+        CacheData<Object> cacheData = MemoryCache.GetInstance().Get(name);
+        if (cacheData != null)
         {
             if (onComplete != null) {
-                onComplete(request.obj);
+                onComplete(cacheData.cache);
             }
             return;
         }
@@ -88,7 +88,12 @@ public class FileLoader : MonoBehaviour{
                     }
                 }   
                 //Instantiate(request.obj);
-                MemoryCache.GetInstance().Add(name, request);
+                CacheData<Object> cacheData = new CacheData<Object>();
+                cacheData.cache = request.obj;
+                cacheData.dependencies = request.dependencies;
+                //加入缓存
+                MemoryCache.GetInstance().Add(name, cacheData);
+                //从正在加载中移除
                 loadingList.Remove(name);
                 print(request.onComplete);
                 if (request.onComplete!=null)
