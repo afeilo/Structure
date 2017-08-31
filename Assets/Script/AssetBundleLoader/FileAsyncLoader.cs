@@ -18,8 +18,8 @@ public class FileAsyncLoader : ILoader
         var assetLoadRequest = myLoadedAssetBundle.LoadAllAssetsAsync();
         yield return assetLoadRequest;
         request.obj = assetLoadRequest.asset;
-
-        //  myLoadedAssetBundle.Unload(false);
+		request.ab = myLoadedAssetBundle;
+//        myLoadedAssetBundle.Unload(false);
 
         //WWW www = new WWW (request.path);
         //yield return www;

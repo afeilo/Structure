@@ -7,6 +7,7 @@ public class FileLoader : MonoBehaviour{
 	private static string path;
     private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
     private AssetBundleManifest abManifest;
+	private GameObject instant;
     public void Awake(){
         path = Application.streamingAssetsPath;
         loadManifest();
@@ -25,18 +26,21 @@ public class FileLoader : MonoBehaviour{
 		MLog.D("Load = " + name);
         Load(name, o => {
 			MLog.D("instantiate");
-            Instantiate(o as GameObject);
+			instant = Instantiate(o as GameObject);
         });
     }
+	public void remove(){
+		Destroy (instant);
+	}
     public void Load(string name, System.Action<Object> onComplete)
     {
-        print(loadingList);
         //是否正在加载
         if (loadingList.ContainsKey(name)) {
             return;
         }
         //缓存获取
         CacheData<Object> cacheData = MemoryCache.GetInstance().Get(name);
+		print (cacheData);
         if (cacheData != null)
         {
             if (onComplete != null) {
@@ -51,6 +55,7 @@ public class FileLoader : MonoBehaviour{
         }
         addRequest(name, null, dependecies,onComplete);
 	}
+
 
     //构建Request
     private void addRequest(string name,string path,string[] dependencice){
@@ -88,6 +93,7 @@ public class FileLoader : MonoBehaviour{
                 //Instantiate(request.obj);
                 CacheData<Object> cacheData = new CacheData<Object>();
                 cacheData.cache = request.obj;
+				cacheData.ab = request.ab;
                 cacheData.dependencies = request.dependencies;
                 //加入缓存
                 MemoryCache.GetInstance().Add(name, cacheData);

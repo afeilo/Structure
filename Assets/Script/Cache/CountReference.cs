@@ -11,12 +11,13 @@ class CountReference : MonoBehaviour{
 	public string aBName;
 	CacheData<UnityEngine.Object> cache;
     public void Awake(){
-		cache = MemoryCache.GetInstance ().Get (aBName);
-		cache.references = 1;
+		MLog.D ("Awake");
+		MemoryCache.GetInstance ().ReferenceAdd (aBName);
     }
-    public void Destory(){
-		if (cache != null)
-			cache.references= -1;
+
+	public void OnDestroy(){
+		MLog.D ("OnDestroy");
+		MemoryCache.GetInstance ().ReferenceRemove (aBName);
     }
 
 }

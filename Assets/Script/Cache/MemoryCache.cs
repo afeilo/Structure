@@ -13,7 +13,29 @@ public class MemoryCache : ICache<string, CacheData<Object>>
     public MemoryCache() {
         caches = new Dictionary<string, CacheData<Object>>();
     }
+	public void ReferenceAdd(string key){
+		var cache = Get (key);
+		if (cache != null) {
+			cache.references++;
+		} else {
+			MLog.E ("can't find Cache");
+		}
+	}
+	public void ReferenceRemove(string key){
+		var cache = Get (key);
+		if (cache != null) {
+			cache.references--;
+			if (cache.references == 0) {
+				MLog.D("remove" + key);
+				Remove (key);
+				cache.Dispose ();
+			}
+		} else {
+			MLog.E ("can't find Cache");
+		}
+	}
     public override void Init() { 
+		
     }
     public override void Clear() { 
 
@@ -37,17 +59,19 @@ public class MemoryCache : ICache<string, CacheData<Object>>
         string[] dependencies = cache.dependencies;
         for (int i = 0; i < dependencies.Length; i++)
         {
-            var dependence = Get(dependencies[i]);
-            if (dependence != null)
-            {
-				dependence.references= 1;
-            }
-            else
-            {
-
-                MLog.E("dependencies can't loaded normally");
-            }
+			ReferenceRemove (dependencies [i]);
+//            var dependence = Get(dependencies[i]);
+//            if (dependence != null)
+//            {
+//				dependence.references= 1;
+//            }
+//            else
+//            {
+//
+//                MLog.E("dependencies can't loaded normally");
+//            }
         }
+		caches.Remove (key);
         //cache.references--;
     }
 
@@ -60,14 +84,7 @@ public class MemoryCache : ICache<string, CacheData<Object>>
         caches.Add(key, value);
         string[] dependencies = value.dependencies;
         for (int i = 0; i < dependencies.Length; i++) { 
-            var cache = Get(dependencies[i]);
-            if (cache != null)
-            {
-				cache.references =  -1;
-            }
-            else {
-                MLog.E("dependencies can't loaded normally");
-            }
+			ReferenceAdd (dependencies [i]);
         }
         //value.references++;
     }
