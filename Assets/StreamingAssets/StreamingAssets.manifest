@@ -1,18 +1,7 @@
 ManifestFileVersion: 0
-CRC: 3776170403
+CRC: 404219824
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
-      Name: prefab-1
-      Dependencies:
-        Dependency_0: texture-1
-    Info_1:
-      Name: prefab-2
-      Dependencies:
-        Dependency_0: texture-2
-    Info_2:
-      Name: texture-1
-      Dependencies: {}
-    Info_3:
-      Name: texture-2
+      Name: baseui_1
       Dependencies: {}

@@ -3,11 +3,28 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class FileLoader : MonoBehaviour{
+public class ABLoader:MonoBehaviour{
 	private static string path;
     private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
     private AssetBundleManifest abManifest;
-	private GameObject instant;
+
+    private static ABLoader loader;
+    private static string abloader_name = "ABLoader";
+
+    public static ABLoader instance
+    {
+        get
+        {
+            if (loader == null)
+            {
+                GameObject go = new GameObject(abloader_name);
+                loader = go.AddComponent<ABLoader>();
+            }
+
+            return loader;
+        }
+    }
+
     public void Awake(){
         path = Application.streamingAssetsPath;
         loadManifest();
@@ -15,23 +32,16 @@ public class FileLoader : MonoBehaviour{
 
     private void loadManifest()
     {
-        var bundleLoadRequest = AssetBundle.LoadFromFile( Path.Combine(path,"StreamingAssets"));
+        MLog.D("loadManifest");
+        var bundleLoadRequest = AssetBundle.LoadFromFile(Path.Combine(path,"StreamingAssets"));
         abManifest = bundleLoadRequest.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
     }
 
-    public void GC() {
-        System.GC.Collect();
-    }
-    public void Load(string name) {
-		MLog.D("Load = " + name);
-        Load(name, o => {
-			MLog.D("instantiate");
-			instant = Instantiate(o as GameObject);
-        });
-    }
-	public void remove(){
-		Destroy (instant);
-	}
+    /// <summary>
+    /// 加载ab
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="onComplete"></param>
     public void Load(string name, System.Action<Object> onComplete)
     {
         //是否正在加载
@@ -40,7 +50,7 @@ public class FileLoader : MonoBehaviour{
         }
         //缓存获取
         CacheData<Object> cacheData = MemoryCache.GetInstance().Get(name);
-		print (cacheData);
+        //MLog.D(cacheData.ToString());
         if (cacheData != null)
         {
             if (onComplete != null) {
@@ -56,25 +66,49 @@ public class FileLoader : MonoBehaviour{
         addRequest(name, null, dependecies,onComplete);
 	}
 
-
-    //构建Request
+   
+    /// <summary>
+    /// 构建Request
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="dependencice"></param>
     private void addRequest(string name,string path,string[] dependencice){
         addRequest(name, path, dependencice, null);
     }
+
+    /// <summary>
+    /// 构建Request
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="dependencice"></param>
+    /// <param name="onComplete"></param>
     private void addRequest(string name, string path, string[] dependencice, System.Action<Object> onComplete)
     {
         Request request = GetRequest(name, null);
         request.dependencies = dependencice;
         request.onComplete = onComplete;
         loadingList.Add(name, request);
-        startTask(new FileAsyncLoader().LoadAssets(request), name);
+        startTask(new ABAsyncLoader().LoadAssets(request), name);
     }
+
+    /// <summary>
+    /// 开启任务
+    /// </summary>
+    /// <param name="coroutine"></param>
+    /// <param name="name"></param>
     private void startTask(IEnumerator coroutine,string name) {
         TaskManager.TaskState state = TaskManager.CreateTask(coroutine, name);
         state.Finished += finishLoad;
         state.Start();
     }
-    //加载完成
+
+    /// <summary>
+    /// 加载完成
+    /// </summary>
+    /// <param name="manual"></param>
+    /// <param name="name"></param>
     private void finishLoad(bool manual,string name)
     {
 		MLog.D("finishload = " + name);
@@ -99,7 +133,7 @@ public class FileLoader : MonoBehaviour{
                 MemoryCache.GetInstance().Add(name, cacheData);
                 //从正在加载中移除
                 loadingList.Remove(name);
-                print(request.onComplete);
+                //MLog.D(request.onComplete);
                 if (request.onComplete!=null)
                     request.onComplete(request.obj);
             }
