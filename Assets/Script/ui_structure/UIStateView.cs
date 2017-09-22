@@ -41,6 +41,7 @@ public class UIStateView : IStateView
         return false;
     }
 
+
     private ViewContainer viewContainer;
 
     public static UIStateView BindView(GameObject gameObject)
@@ -51,4 +52,5 @@ public class UIStateView : IStateView
     {
         viewContainer = gameObject.GetComponent<ViewContainer>();
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.FrameWork.Resources.simulate;
+using UnityEngine;
 
 public class PFileAsyncLoader : PLoader
 {

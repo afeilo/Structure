@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using Assets.FrameWork.Resources.simulate;
+using System.Collections;
 using UnityEngine;
 
-public class ABAsyncLoader : ILoader
+public class ABAsyncLoader
 {
-    public override IEnumerator LoadAssets(Request request)
+    public IEnumerator LoadAssets(Request request)
     {
         var bundleLoadRequest = AssetBundle.LoadFromFileAsync(request.path);
         yield return bundleLoadRequest;

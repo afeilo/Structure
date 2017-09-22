@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.FrameWork.Resources;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,20 +7,17 @@ public class UIStateManager : MonoBehaviour,IStateManager {
 
     public string main;
 
-    public Transform[] UIStruct;
+
+    private LoadAssetCallbacks loadAssetCallback;
     void Awake()
     {
         manager = this;
     }
 	// Use this for initialization
 	void Start () {
+        loadAssetCallback = new LoadAssetCallbacks(loadSuccess,loadFail);
         SetCurrentView(main);
 	}
-
-    public Transform GetParent(int index) {
-        return UIStruct[index];
-    }
-    
 
 	// Update is called once per frame
 	void Update () {
@@ -45,7 +43,15 @@ public class UIStateManager : MonoBehaviour,IStateManager {
         }
     }
 
+    /// <summary>
+    /// 任务栈
+    /// </summary>
     private Stack listStack = new Stack();
+
+    /// <summary>
+    /// 加载过的任务
+    /// </summary>
+    private Dictionary<string, IStateView> recentView = new Dictionary<string, IStateView>();
 
     /// <summary>
     /// 设置当前页面
@@ -56,17 +62,19 @@ public class UIStateManager : MonoBehaviour,IStateManager {
         if (currentUIState!=null)
             currentUIState.PagePause();
       //  StateObject stateObject = StateRejester.getInstance().getStateObject(stateId);
-        ABLoader.instance.Load(abName, loadSuccess);
+        ResourceManager.instance.LoadAsset(abName, loadAssetCallback);
     }
 
     /// <summary>
     /// 加载成功
     /// </summary>
     /// <param name="obj"></param>
-    private void loadSuccess(Object obj)
+    private void loadSuccess(string abname, System.Object obj)
     {
-        GameObject gameObject = Instantiate(obj) as GameObject;
+        GameObject gameObject = Instantiate(obj as Object) as GameObject;
         IStateView view = UIStateView.BindView(gameObject);
+        recentView.Add(name, view);
+        gameObject.name = abname;
         view.PageCreate();
         if (!view.IsPopupWindow())
         {
@@ -78,10 +86,36 @@ public class UIStateManager : MonoBehaviour,IStateManager {
         currentUIState = view;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="errorMessage"></param>
+    private void loadFail(string name, string errorMessage)
+    {
+       
+    }
 
+    /// <summary>
+    /// 返回上一页
+    /// </summary>
     public void GoBack()
     {
-
+        IStateView newStateView = listStack.Pop() as IStateView;
+        currentUIState.PagePause();
+        if (newStateView != null) {
+            if (!currentUIState.IsPopupWindow())
+            {
+                newStateView.PageStart();
+            }
+        }
+        currentUIState.PageStop();
+        //recentView.Add();
+        if (newStateView != null) {
+            newStateView.PageResume();
+            currentUIState = newStateView;
+        }
+        
     }
 
     public IStateView getCurrentView() {
