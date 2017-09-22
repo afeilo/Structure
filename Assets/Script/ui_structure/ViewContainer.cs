@@ -7,7 +7,6 @@ using UnityEngine;
 /// </summary>
 public class ViewContainer : IViewContainer {
 
-
 	// Use this for initialization
     void Awake() {
        

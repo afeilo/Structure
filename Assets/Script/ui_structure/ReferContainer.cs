@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class ReferContainer : MonoBehaviour {
-
+    public Object[] monos;
+    public string[] name;
+    public 
 	// Use this for initialization
 	void Start () {
 		
