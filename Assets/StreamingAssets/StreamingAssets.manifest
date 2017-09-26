@@ -1,7 +1,14 @@
 ManifestFileVersion: 0
-CRC: 2549190274
+CRC: 1106493111
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: baseui_1
+      Dependencies: {}
+    Info_1:
+      Name: image_1
+      Dependencies:
+        Dependency_0: image
+    Info_2:
+      Name: image
       Dependencies: {}
