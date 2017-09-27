@@ -7,7 +7,7 @@ namespace Assets.FrameWork.Resources
 {
     public class LoadAssetCallbacks
     {
-        public delegate void loadAssetSuccess(string abname, Object obj);
+        public delegate void loadAssetSuccess(string abname, object obj);
         public delegate void loadAssetFail(string abname, string errorMessage);
 
         public readonly loadAssetSuccess m_LoadAssetSuccessCallback;

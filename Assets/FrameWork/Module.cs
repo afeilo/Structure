@@ -10,7 +10,12 @@ namespace Assets.FrameWork
     public class Module
     {
         public static IAssetLoader getAssetLoader() {
-            return new ABLoader();
+            return new AssetLoader();
+        }
+
+        public static IResourceLoader getResourceLoader()
+        {
+            return new ResourceLoader(new AssetCheckDependency(),new AssetLoader());
         }
     }
 }

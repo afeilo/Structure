@@ -8,14 +8,14 @@ namespace Assets.FrameWork.Resources.simulate
 {
     public class ResourceLoader:IResourceLoader
     {
-        private ICheckDependency<DependecyInfo> dependency;
+        private ICheckDependency dependency;
         private IAssetLoader assetLoader;
-        private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
-        private ISpawnPool<ResourceObject> resourcePool;
 
-        public void Init() { 
-        
+        public ResourceLoader(ICheckDependency dependency, IAssetLoader assetLoader) {
+            this.dependency = dependency;
+            this.assetLoader = assetLoader;
         }
+
 
         /// <summary>
         /// 加載資源
@@ -23,8 +23,18 @@ namespace Assets.FrameWork.Resources.simulate
         /// <param name="name"></param>
         /// <param name="callback"></param>
         public void LoadAsset(string name, LoadAssetCallbacks callback) {
-            string[] dependencies = dependency.GetDependencies(name);
 
+            string[] dependencies = dependency.GetDependencies(name);
+            if (dependencies != null)
+            {
+                for (int i = 0, len = dependencies.Length; i < len; i++)
+                {
+                    LoadAsset(dependencies[i], null);
+                }
+            }
+          
+            assetLoader.LoadAsset(name, callback);
+            //TODO 加载
         }
 
 

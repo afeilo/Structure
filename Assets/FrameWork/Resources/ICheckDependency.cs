@@ -8,7 +8,7 @@ namespace Assets.FrameWork.Resources
     /// <summary>
     /// 依赖信息
     /// </summary>
-    public interface ICheckDependency<T> where T : DependecyInfo
+    public interface ICheckDependency
     {
         /// <summary>
         /// 添加依賴

@@ -10,13 +10,14 @@ namespace Assets.FrameWork.Resources
 {
     class ResourceManager : MonoBehaviour, IResourceManager
     {
-        private IAssetLoader assetLoader;
+        private IResourceLoader resourceLoader;
         public static ResourceManager instance;
 
         void Awake(){
             //TODO 指定一个默认的加载器
-            if (assetLoader == null) {
-                assetLoader = Module.getAssetLoader();
+            if (resourceLoader == null)
+            {
+                resourceLoader = Module.getResourceLoader();
             }
             instance = this;
         }
@@ -38,7 +39,7 @@ namespace Assets.FrameWork.Resources
         /// <param name="loadAssetCallBack"></param>
         /// <param name="userData"></param>
         public void LoadAsset(string name, LoadAssetCallbacks loadAssetCallBack, object userData) {
-            assetLoader.LoadAsset(name, loadAssetCallBack);
+            resourceLoader.LoadAsset(name, loadAssetCallBack);
 
         }
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using Assets.FrameWork.Resources;
+using Assets.FrameWork.Resources.cache;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,39 +7,12 @@ using UnityEngine;
 
 namespace Assets.FrameWork.Resources.simulate
 {
-    public class ABLoader : IAssetLoader
+    public class AssetLoader : IAssetLoader
     {
-        private static string path;
+
         private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
-        private AssetBundleManifest abManifest;
-
-        private static ABLoader loader;
-        private static string abloader_name = "ABLoader";
-
-        public ABLoader()
-        {
-            init(Application.streamingAssetsPath);
-        }
-
-        public void init(string abpath)
-        {
-            path = abpath;
-            loadManifest();
-        }
-
-        private void loadManifest()
-        {
-            MLog.D("loadManifest");
-            var bundleLoadRequest = AssetBundle.LoadFromFile(Path.Combine(path, "StreamingAssets"));
-            abManifest = bundleLoadRequest.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-        }
-
-
-        public void Load(string name, System.Action<Object> onComplete)
-        {
-            //是否正在加载
-
-        }
+        private ISpawnPool<AssetObject> resourcePool = new AssetSpawnPool<AssetObject>();
+        private Dictionary<string, List<LoadAssetCallbacks>> callBacks = new Dictionary<string, List<LoadAssetCallbacks>>();
 
         /// <summary>
         /// 加载ab
@@ -47,34 +21,31 @@ namespace Assets.FrameWork.Resources.simulate
         /// <param name="onComplete"></param>
         public override void LoadAsset(string name, LoadAssetCallbacks callback)
         {
-            if (loadingList.ContainsKey(name))
+            if (callBacks.ContainsKey(name))
             {
-                Request request;
-                loadingList.TryGetValue(name, out request);
-                if (request != null)
+                List<LoadAssetCallbacks> loadAssetCallBack;
+                callBacks.TryGetValue(name, out loadAssetCallBack);
+                if (loadAssetCallBack != null)
                 {
+                    loadAssetCallBack.Add(callback);
                     //request.callback += callback;
+                    
                 }
                 return;
             }
             //缓存获取
-            CacheData<Object> cacheData = MemoryCache.GetInstance().Get(name);
-            //MLog.D(cacheData.ToString());
+            AssetObject cacheData = resourcePool.Spawn(name);
+
             if (cacheData != null)
             {
                 if (callback != null)
                 {
-                    callback.LoadAssetSuccessCallback(name, cacheData.cache);
+                    callback.LoadAssetSuccessCallback(name, cacheData.Target);
                 }
                 return;
             }
-            //添加依赖
-            string[] dependecies = abManifest.GetAllDependencies(name);
-            for (int i = 0; i < dependecies.Length; i++)
-            {
-                Load(dependecies[i], null);
-            }
-            addRequest(name, null, dependecies, callback);
+
+            addRequest(name, null,callback);
         }
 
         /// <summary>
@@ -83,9 +54,9 @@ namespace Assets.FrameWork.Resources.simulate
         /// <param name="name"></param>
         /// <param name="path"></param>
         /// <param name="dependencice"></param>
-        private void addRequest(string name, string path, string[] dependencice)
+        private void addRequest(string name, string path)
         {
-            addRequest(name, path, dependencice, null);
+            addRequest(name, path, null);
         }
 
         /// <summary>
@@ -95,11 +66,13 @@ namespace Assets.FrameWork.Resources.simulate
         /// <param name="path"></param>
         /// <param name="dependencice"></param>
         /// <param name="onComplete"></param>
-        private void addRequest(string name, string path, string[] dependencice, LoadAssetCallbacks callback)
+        private void addRequest(string name, string path, LoadAssetCallbacks callback)
         {
             Request request = GetRequest(name, null);
-            request.dependencies = dependencice;
-            request.callback = callback;
+
+            List<LoadAssetCallbacks> loadAssetCallBack = new List<LoadAssetCallbacks>();
+            loadAssetCallBack.Add(callback);
+            callBacks.Add(name, loadAssetCallBack);
             loadingList.Add(name, request);
             startTask(LoadAssets(request), name);
         }
@@ -123,34 +96,32 @@ namespace Assets.FrameWork.Resources.simulate
         /// <param name="name"></param>
         private void finishLoad(bool manual, string name)
         {
-            MLog.D("finishload = " + name);
+            MLog.D("finishLoad = " + manual);
             if (!manual)
             {
+                
                 Request request;
                 loadingList.TryGetValue(name, out request);
                 if (request != null)
                 {
-                    string[] dependencies = request.dependencies;
-                    for (int i = 0; i < dependencies.Length; i++)
-                    {
-                        if (MemoryCache.GetInstance().Get(dependencies[i]) == null)
-                        {
-                            startTask(wait4Dependencies(dependencies), name);
-                            return;
-                        }
-                    }
-                    //Instantiate(request.obj);
-                    CacheData<Object> cacheData = new CacheData<Object>();
-                    cacheData.cache = request.obj;
-                    cacheData.ab = request.ab;
-                    cacheData.dependencies = request.dependencies;
-                    //加入缓存
-                    MemoryCache.GetInstance().Add(name, cacheData);
+                    AssetObject assetObject = new AssetObject(request.ab, name, request.obj);
                     //从正在加载中移除
                     loadingList.Remove(name);
                     //MLog.D(request.onComplete);
-
-                    request.callback.LoadAssetSuccessCallback(request.name, request.obj);
+                    List<LoadAssetCallbacks> loadAssetCallBack;
+                    callBacks.TryGetValue(name, out loadAssetCallBack);
+                    if (loadAssetCallBack != null) {
+                        for (int i = 0, len = loadAssetCallBack.Count; i < len; i++)
+                        {
+                            if (loadAssetCallBack[i]!=null) {
+                                MLog.D("LoadAssetSuccessCallback = " + request.name);
+                                loadAssetCallBack[i].LoadAssetSuccessCallback(request.name, request.obj);
+                            }
+                            
+                        }
+                        callBacks.Remove(name); 
+                    }
+                   
                 }
 
             }
@@ -190,21 +161,21 @@ namespace Assets.FrameWork.Resources.simulate
         }
 
         //暂时依赖用这种策略，但是比较消耗资源，有更好的方式再替换
-        IEnumerator wait4Dependencies(string[] dependencies)
-        {
-            for (int i = 0; i < dependencies.Length; i++)
-            {
-                while (MemoryCache.GetInstance().Get(dependencies[i]) == null)
-                {
-                    yield return 0;
-                }
-            }
-        }
+        //IEnumerator wait4Dependencies(string[] dependencies)
+        //{
+        //    for (int i = 0; i < dependencies.Length; i++)
+        //    {
+        //        while (MemoryCache.GetInstance().Get(dependencies[i]) == null)
+        //        {
+        //            yield return 0;
+        //        }
+        //    }
+        //}
 
         public Request GetRequest(string name, string path)
         {
             if (path == null)
-                return new Request(name, Path.Combine(Application.streamingAssetsPath, name));
+                return new Request(name, UUtils.GetStreamingAssets(name));
             else
                 return new Request(name, path);
         }
