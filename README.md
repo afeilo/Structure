@@ -31,3 +31,7 @@ Q：
 - 9.26
 
 1.继续完善细化资源加载。
+
+- 10.12
+
+1.重新构建层级结构，[参考](https://github.com/EllanJiang/GameFramework)
