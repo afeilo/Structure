@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Assets.FrameWork.Resources.simulate
-{
+namespace Assets.FrameWork{
     public class ResourceLoader:IResourceLoader
     {
         private ICheckDependency dependency;

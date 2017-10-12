@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.FrameWork.Resources.simulate
+namespace Assets.Runtime
 {
     /// <summary>
     /// 工具类

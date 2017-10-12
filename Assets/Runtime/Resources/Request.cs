@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Assets.FrameWork.Resources.simulate
+namespace Assets.Runtime
 {
     public class Request
     {

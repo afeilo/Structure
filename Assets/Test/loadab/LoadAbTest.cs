@@ -1,4 +1,5 @@
-﻿using Assets.FrameWork.Resources;
+﻿using Assets.FrameWork;
+using Assets.FrameWork.Resources;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

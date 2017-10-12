@@ -5,7 +5,7 @@ using UnityEngine;
 /*
  * 资源加载父类，定义资源加载的接口
  */
-namespace Assets.FrameWork.Resources
+namespace Assets.FrameWork
 {
     public abstract class ISceneLoader
     {

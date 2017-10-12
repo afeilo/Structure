@@ -5,24 +5,23 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.FrameWork.Resources
+namespace Assets.FrameWork
 
 {
-    class ResourceManager : MonoBehaviour, IResourceManager
+    public class ResourceManager : FrameWorkModule,IResourceManager
     {
         private IResourceLoader resourceLoader;
         public static ResourceManager instance;
 
         void Awake(){
             //TODO 指定一个默认的加载器
-            if (resourceLoader == null)
-            {
-                resourceLoader = Module.getResourceLoader();
-            }
+           
             instance = this;
         }
 
-
+        public void SetResourceLoader(IResourceLoader resourceLoader) {
+            this.resourceLoader = resourceLoader;
+        }
 
         /// <summary>
         /// 异步加载资源

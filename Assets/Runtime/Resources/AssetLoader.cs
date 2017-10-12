@@ -1,11 +1,12 @@
-﻿using Assets.FrameWork.Resources;
+﻿using Assets.FrameWork;
+using Assets.FrameWork.Resources;
 using Assets.FrameWork.Resources.cache;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace Assets.FrameWork.Resources.simulate
+namespace Assets.Runtime
 {
     public class AssetLoader : IAssetLoader
     {
@@ -18,7 +19,7 @@ namespace Assets.FrameWork.Resources.simulate
         /// 加载ab
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="onComplete"></param>
+        /// <param name="onComplete"></param>AssetLoader
         public override void LoadAsset(string name, LoadAssetCallbacks callback)
         {
             if (callBacks.ContainsKey(name))

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Assets.FrameWork.Resources
+namespace Assets.FrameWork
 {
     /// <summary>
     /// 依賴信息

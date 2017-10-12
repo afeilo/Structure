@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Assets.FrameWork.Resources
+namespace Assets.FrameWork
 {
     /// <summary>
     /// 用来做资源加载

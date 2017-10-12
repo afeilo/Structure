@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Assets.FrameWork.Resources
+namespace Assets.FrameWork
 {
     public interface IResourceManager
     {
@@ -37,5 +37,10 @@ namespace Assets.FrameWork.Resources
         /// <param name="loadSceneCallbacks">加载场景回调函数集。</param>
         /// <param name="userData">用户自定义数据。</param>
         void LoadScene(string sceneAssetName, LoadSceneCallbacks loadSceneCallbacks, object userData);
+       /// <summary>
+       /// 设置ResourceLoader
+       /// </summary>
+       /// <param name="resourceLoader"></param>
+        void SetResourceLoader(IResourceLoader resourceLoader);
     }
 }

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Assets.FrameWork;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.FrameWork.Resources.simulate
+namespace Assets.Runtime
 {
     class AssetCheckDependency : ICheckDependency
     {

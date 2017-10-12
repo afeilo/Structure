@@ -5,8 +5,7 @@ using System.Text;
 
 namespace Assets.FrameWork
 {
-    interface IResourceHelper
+    public abstract class FrameWorkModule
     {
-        void Release(object target);
     }
 }
