@@ -1,5 +1,4 @@
 ﻿using Assets.FrameWork;
-using Assets.FrameWork.Resources;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +10,7 @@ public class LoadAbTest : MonoBehaviour {
         loadAssetCallback = new LoadAssetCallbacks(loadSuccess, loadFail);
 	}
     public void load() {
-        ResourceManager.instance.LoadAsset("image_1", loadAssetCallback);
+        ResourceManager.instance.LoadAsset("","image_1", loadAssetCallback);
     }
 
     /// <summary>

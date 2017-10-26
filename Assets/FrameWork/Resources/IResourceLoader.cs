@@ -12,12 +12,15 @@ namespace Assets.FrameWork
     /// </summary>
     public interface IResourceLoader
     {
+
         /// <summary>
         /// 加載AssetBundle
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="bundleName">assetbundle name</param>
+        /// <param name="assetName">asset name</param>
         /// <param name="callback"></param>
-        void LoadAsset(string name, LoadAssetCallbacks callback);
+       
+        void LoadAsset(string bundleName, string assetName, LoadAssetCallbacks callback);
 
         /// <summary>
         /// 加載場景

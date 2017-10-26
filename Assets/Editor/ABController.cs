@@ -9,11 +9,12 @@ public class ABController{
 	[MenuItem("AssetBundle/make")]
 	public static void ab(){
 		if (Directory.Exists (path)) {
-			Directory.Delete (path);
-			Directory.CreateDirectory (path);
+            //Directory.Delete (path);
+            //File.Delete(path);
+			//Directory.CreateDirectory (path);
 		} else {
 			Directory.CreateDirectory (path);
 		}
-		BuildPipeline.BuildAssetBundles(path, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
+		BuildPipeline.BuildAssetBundles(path, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows64);
 	}
 }

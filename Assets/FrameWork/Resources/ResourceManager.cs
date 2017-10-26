@@ -1,5 +1,4 @@
-﻿using Assets.FrameWork.Resources.cache;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,8 +27,8 @@ namespace Assets.FrameWork
         /// </summary>
         /// <param name="name"></param>
         /// <param name="loadAssetCallBack"></param>
-        public void LoadAsset(string name, LoadAssetCallbacks loadAssetCallBack) {
-            this.LoadAsset(name, loadAssetCallBack, null);
+        public void LoadAsset(string bundleName,string assetName, LoadAssetCallbacks loadAssetCallBack) {
+            this.LoadAsset(bundleName, assetName, loadAssetCallBack, null);
         }
         /// <summary>
         /// 异步加载资源
@@ -37,8 +36,9 @@ namespace Assets.FrameWork
         /// <param name="name"></param>
         /// <param name="loadAssetCallBack"></param>
         /// <param name="userData"></param>
-        public void LoadAsset(string name, LoadAssetCallbacks loadAssetCallBack, object userData) {
-            resourceLoader.LoadAsset(name, loadAssetCallBack);
+        public void LoadAsset(string bundleName, string assetName, LoadAssetCallbacks loadAssetCallBack, object userData)
+        {
+            resourceLoader.LoadAsset(bundleName, assetName, loadAssetCallBack);
 
         }
         /// <summary>

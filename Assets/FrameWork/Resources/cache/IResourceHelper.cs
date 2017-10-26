@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Assets.FrameWork
 {
-    interface IResourceHelper
+    interface IResourceHelper<T>
     {
-        void Release(object target);
+        void Release(T target);
     }
 }

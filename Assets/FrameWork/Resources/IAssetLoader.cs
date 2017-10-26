@@ -9,6 +9,12 @@ namespace Assets.FrameWork
 {
     public abstract class IAssetLoader
     {
-        public abstract void LoadAsset(string name,LoadAssetCallbacks callback);
+        /// <summary>
+        /// 加载资源
+        /// </summary>
+        /// <param name="bundleName"></param>
+        /// <param name="assetName"></param>
+        /// <param name="callback"></param>
+        public abstract void LoadAsset(string bundleName, string assetName,string[] dependencies, LoadAssetCallbacks callback);
     }
 }

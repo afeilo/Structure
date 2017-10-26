@@ -1,4 +1,4 @@
-﻿using Assets.FrameWork.Resources.cache;
+﻿using Assets.FrameWork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,16 +6,20 @@ using System.Text;
 
 namespace Assets.Runtime
 {
-    class AssetSpawnPool<T> : ISpawnPool<T> where T : BaseObject
+    class ResourceSpawnPool<T> : ISpawnPool<T>
     {
-        Dictionary<string, T> cache = new Dictionary<string, T>();
+        /**
+         * Todo 这种写法有点破坏原有的结构
+         */
+        Dictionary<string, BaseObject<T>> cache = new Dictionary<string, BaseObject<T>>();
         /// <summary>
         /// 获取缓存对象
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public T Spawn(string name) {
-            T t;
+        public BaseObject<T> Spawn(string name)
+        {
+            BaseObject<T> t;
             cache.TryGetValue(name, out t);
             return t;
         }
@@ -24,7 +28,8 @@ namespace Assets.Runtime
         /// </summary>
         /// <param name="name"></param>
         /// <param name="t"></param>
-        public void Add(string name, T t) {
+        public void Add(string name, BaseObject<T> t)
+        {
             cache.Add(name, t);
         }
         /// <summary>

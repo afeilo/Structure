@@ -1,5 +1,4 @@
-﻿using Assets.FrameWork.Resources;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.FrameWork
@@ -56,7 +55,7 @@ namespace Assets.FrameWork
             if (currentUIState != null)
                 currentUIState.PagePause();
             //  StateObject stateObject = StateRejester.getInstance().getStateObject(stateId);
-            mResourceManager.LoadAsset(abName, loadAssetCallback);
+            mResourceManager.LoadAsset(abName, abName, loadAssetCallback);
         }
 
         /// <summary>

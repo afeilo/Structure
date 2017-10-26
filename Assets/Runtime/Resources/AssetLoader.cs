@@ -1,6 +1,4 @@
 ﻿using Assets.FrameWork;
-using Assets.FrameWork.Resources;
-using Assets.FrameWork.Resources.cache;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -10,72 +8,55 @@ namespace Assets.Runtime
 {
     public class AssetLoader : IAssetLoader
     {
+        ///// <summary>
+        ///// 正在加载的资源列表 key为AssetName
+        ///// </summary>
+        //private static Dictionary<string, Request> assetLoadingList = new Dictionary<string, Request>();
+        ///// <summary>
+        ///// 正在加载的AB列表 key为BundleName
+        ///// </summary>
+        //private static Dictionary<string, Request> bundleLoadingList = new Dictionary<string, Request>();
+        /// <summary>
+        /// AB缓存
+        /// </summary>
+        private static ISpawnPool<AssetBundle> bundlePool = new ResourceSpawnPool<AssetBundle>();
+        /// <summary>
+        /// AB缓存
+        /// </summary>
+        private static ISpawnPool<Object> assetPool = new ResourceSpawnPool<Object>();
+        /// <summary>
+        /// 回调列表 key为assetName
+        /// </summary>
+        private static Dictionary<string, List<LoadAssetCallbacks>> callBacks = new Dictionary<string, List<LoadAssetCallbacks>>();
 
-        private static Dictionary<string, Request> loadingList = new Dictionary<string, Request>();
-        private ISpawnPool<AssetObject> resourcePool = new AssetSpawnPool<AssetObject>();
-        private Dictionary<string, List<LoadAssetCallbacks>> callBacks = new Dictionary<string, List<LoadAssetCallbacks>>();
-
+        /// <summary>
+        /// AssetBundle release
+        /// </summary>
+        private BundleReleaseHelper bundleReleaseHelper = new BundleReleaseHelper();
+        /// <summary>
+        /// object release
+        /// </summary>
+        private ObjectReleaseHelper objectReleaseHelper = new ObjectReleaseHelper();
         /// <summary>
         /// 加载ab
         /// </summary>
         /// <param name="name"></param>
         /// <param name="onComplete"></param>AssetLoader
-        public override void LoadAsset(string name, LoadAssetCallbacks callback)
+        public override void LoadAsset(string bundleName, string assetName, string[] dependencies, LoadAssetCallbacks callback)
         {
-            if (callBacks.ContainsKey(name))
+            Request request = GetRequest(bundleName, assetName,dependencies, null);
+            List<LoadAssetCallbacks> loadAssetCallBack;
+            callBacks.TryGetValue(assetName, out loadAssetCallBack);
+            if (loadAssetCallBack != null)
             {
-                List<LoadAssetCallbacks> loadAssetCallBack;
-                callBacks.TryGetValue(name, out loadAssetCallBack);
-                if (loadAssetCallBack != null)
-                {
-                    loadAssetCallBack.Add(callback);
-                    //request.callback += callback;
-                    
-                }
-                return;
+                loadAssetCallBack.Add(callback);
             }
-            //缓存获取
-            AssetObject cacheData = resourcePool.Spawn(name);
-
-            if (cacheData != null)
-            {
-                if (callback != null)
-                {
-                    callback.LoadAssetSuccessCallback(name, cacheData.Target);
-                }
-                return;
+            else {
+                loadAssetCallBack = new List<LoadAssetCallbacks>();
+                loadAssetCallBack.Add(callback);
+                callBacks.Add(assetName, loadAssetCallBack);
+                startTask(LoadAssets(request), assetName);
             }
-
-            addRequest(name, null,callback);
-        }
-
-        /// <summary>
-        /// 构建Request
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="path"></param>
-        /// <param name="dependencice"></param>
-        private void addRequest(string name, string path)
-        {
-            addRequest(name, path, null);
-        }
-
-        /// <summary>
-        /// 构建Request
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="path"></param>
-        /// <param name="dependencice"></param>
-        /// <param name="onComplete"></param>
-        private void addRequest(string name, string path, LoadAssetCallbacks callback)
-        {
-            Request request = GetRequest(name, null);
-
-            List<LoadAssetCallbacks> loadAssetCallBack = new List<LoadAssetCallbacks>();
-            loadAssetCallBack.Add(callback);
-            callBacks.Add(name, loadAssetCallBack);
-            loadingList.Add(name, request);
-            startTask(LoadAssets(request), name);
         }
 
         /// <summary>
@@ -90,6 +71,7 @@ namespace Assets.Runtime
             state.Start();
         }
 
+
         /// <summary>
         /// 加载完成
         /// </summary>
@@ -100,85 +82,88 @@ namespace Assets.Runtime
             MLog.D("finishLoad = " + manual);
             if (!manual)
             {
-                
-                Request request;
-                loadingList.TryGetValue(name, out request);
-                if (request != null)
+                BaseObject<Object> assetObject = assetPool.Spawn(name);
+                List<LoadAssetCallbacks> loadAssetCallBack;
+                callBacks.TryGetValue(name, out loadAssetCallBack);
+                if (loadAssetCallBack != null)
                 {
-                    AssetObject assetObject = new AssetObject(request.ab, name, request.obj);
-                    //从正在加载中移除
-                    loadingList.Remove(name);
-                    //MLog.D(request.onComplete);
-                    List<LoadAssetCallbacks> loadAssetCallBack;
-                    callBacks.TryGetValue(name, out loadAssetCallBack);
-                    if (loadAssetCallBack != null) {
-                        for (int i = 0, len = loadAssetCallBack.Count; i < len; i++)
+                    
+                    for (int i = 0, len = loadAssetCallBack.Count; i < len; i++)
+                    {
+                        if (loadAssetCallBack[i] != null)
                         {
-                            if (loadAssetCallBack[i]!=null) {
-                                MLog.D("LoadAssetSuccessCallback = " + request.name);
-                                loadAssetCallBack[i].LoadAssetSuccessCallback(request.name, request.obj);
-                            }
-                            
+                            MLog.D("LoadAssetSuccessCallback = " + name);
+                            loadAssetCallBack[i].LoadAssetSuccessCallback(name, assetObject.Target);
                         }
-                        callBacks.Remove(name); 
-                    }
-                   
-                }
 
+                    }
+                    callBacks.Remove(name);
+                }
             }
         }
 
+
+        private IEnumerator loadAB(string bundleName)
+        {
+            BaseObject<AssetBundle> bundleObject = bundlePool.Spawn(bundleName);
+            if (bundleObject == null)
+            {
+                var bundleLoadRequest = AssetBundle.LoadFromFileAsync(UUtils.GetStreamingAssets(bundleName));
+                yield return bundleLoadRequest;
+
+                var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
+                if (myLoadedAssetBundle == null)
+                {
+                    MLog.E("Failed to load AssetBundle!");
+                    yield break;
+                }
+                bundleObject = new ResourceObject<AssetBundle>(bundleName, myLoadedAssetBundle, bundleReleaseHelper);
+                bundlePool.Add(bundleName, bundleObject);
+            }
+        
+        }
 
         public IEnumerator LoadAssets(Request request)
         {
-            var bundleLoadRequest = AssetBundle.LoadFromFileAsync(request.path);
-            yield return bundleLoadRequest;
-
-            var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
-            if (myLoadedAssetBundle == null)
-            {
-                Debug.Log("Failed to load AssetBundle!");
-                yield break;
+            if (request.dependencies != null) {
+                for (int i = 0, len = request.dependencies.Length; i < len; i++) {
+                    yield return loadAB(request.dependencies[i]);
+                }
+            }
+            yield return loadAB(request.bundleName);
+            //加载AssetBundle阶段
+            BaseObject<AssetBundle> bundleObject = bundlePool.Spawn(request.bundleName);
+            //加载Asset阶段
+            BaseObject<Object> assetObject = assetPool.Spawn(request.assetName);
+            if (assetObject == null) {
+                AssetBundle assetBundle = bundleObject.Target;
+                var assetLoadRequest = assetBundle.LoadAssetAsync(request.assetName);
+                yield return assetLoadRequest;
+                if (assetLoadRequest == null)
+                {
+                    MLog.E("Failed to load Asset!");
+                    yield break;
+                }
+                assetObject = new ResourceObject<Object>(request.bundleName, assetLoadRequest.asset,objectReleaseHelper);
+                assetPool.Add(request.assetName, assetObject);
             }
 
-            var assetLoadRequest = myLoadedAssetBundle.LoadAllAssetsAsync();
-            yield return assetLoadRequest;
-            request.obj = assetLoadRequest.asset;
-            request.ab = myLoadedAssetBundle;
-            //        myLoadedAssetBundle.Unload(false);
-
-            //WWW www = new WWW (request.path);
-            //yield return www;
-            //request.ab = www.assetBundle;
-            //Object obj = www.assetBundle.mainAsset;
-            //Object[] objs = www.assetBundle.LoadAllAssets();
-            //yield return objs;
-            //request.obj = objs[0];
-            //GameObject clone = Instantiate (request.obj) as GameObject;
-            //clone.name = request.name;
-            //if (parent) {
-            //	clone.transform.parent = parent;
-            //}
         }
 
-        //暂时依赖用这种策略，但是比较消耗资源，有更好的方式再替换
-        //IEnumerator wait4Dependencies(string[] dependencies)
-        //{
-        //    for (int i = 0; i < dependencies.Length; i++)
-        //    {
-        //        while (MemoryCache.GetInstance().Get(dependencies[i]) == null)
-        //        {
-        //            yield return 0;
-        //        }
-        //    }
-        //}
 
-        public Request GetRequest(string name, string path)
+        /// <summary>
+        /// 构造request
+        /// </summary>
+        /// <param name="bundleName"></param>
+        /// <param name="assetName"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public Request GetRequest(string bundleName,string assetName,string[] dependencies, string path)
         {
             if (path == null)
-                return new Request(name, UUtils.GetStreamingAssets(name));
+                return new Request(bundleName, assetName, UUtils.GetStreamingAssets(bundleName), dependencies);
             else
-                return new Request(name, path);
+                return new Request(bundleName, assetName, path, dependencies);
         }
     }
 

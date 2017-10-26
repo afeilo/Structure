@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Assets.FrameWork.Resources.cache
+namespace Assets.FrameWork
 {
-    public abstract class BaseObject
+    public abstract class BaseObject<T>
     {
         /// <summary>
         /// 名称
@@ -18,20 +18,23 @@ namespace Assets.FrameWork.Resources.cache
         /// <summary>
         /// 缓存对象
         /// </summary>
-        public object Target;
+        public T Target;
         /// <summary>
         /// 释放
         /// </summary>
         public abstract void Release();
 
-        public BaseObject(string name,object target) : this(name,target,0) { 
+        public BaseObject(string name, T target)
+            : this(name, target, 0)
+        { 
             
         }
-        public BaseObject(string name, object target,int referencesCount)
+        public BaseObject(string name, T target, int referencesCount)
         {
             Name = name;
             Target = target;
             ReferencesCount = referencesCount;
         }
     }
+    
 }

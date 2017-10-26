@@ -5,19 +5,22 @@ namespace Assets.FrameWork
 {
     public interface IResourceManager
     {
+       /// <summary>
+        ///  异步加载资源
+       /// </summary>
+       /// <param name="bundleName"></param>
+       /// <param name="assetName"></param>
+       /// <param name="loadAssetCallBack"></param>
+        void LoadAsset(string bundleName, string assetName, LoadAssetCallbacks loadAssetCallBack);
+       
         /// <summary>
-        /// 异步加载资源
+        ///  异步加载资源
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="loadAssetCallBack"></param>
-        void LoadAsset(string name,LoadAssetCallbacks loadAssetCallBack);
-        /// <summary>
-        /// 异步加载资源
-        /// </summary>
-        /// <param name="name"></param>
+        /// <param name="bundleName"></param>
+        /// <param name="assetName"></param>
         /// <param name="loadAssetCallBack"></param>
         /// <param name="userData"></param>
-        void LoadAsset(string name, LoadAssetCallbacks loadAssetCallBack, object userData);
+        void LoadAsset(string bundleName, string assetName, LoadAssetCallbacks loadAssetCallBack, object userData);
         /// <summary>
         /// 卸载资源
         /// </summary>
