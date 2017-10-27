@@ -55,6 +55,7 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// A Task object represents a coroutine.  Tasks can be started, paused, and stopped.
 /// It is an error to attempt to start a task that has been stopped or which has
@@ -102,7 +103,8 @@ public class Task
     /// Begins execution of the coroutine
     public void Start()
     {
-        task.Start();
+            task.Start();
+        
     }
 
     /// Discontinues execution of the coroutine at its next yield.
@@ -178,10 +180,18 @@ class TaskManager : MonoBehaviour
 
         public void Start()
         {
-            running = true;
-            singleton.StartCoroutine(CallWrapper());
+            loadingTasks.Add(this);
+            //Debug.Log(loadingTasks.Count);
+            if (loadingTasks.Count == 1) {
+                StartConroutine();
+            }
+            
         }
-
+        private void StartConroutine() {
+            Debug.Log("StartConroutine  " + Time.frameCount);
+            singleton.StartCoroutine(CallWrapper());
+            running = true;
+        }
         public void Stop()
         {
             stopped = true;
@@ -212,11 +222,16 @@ class TaskManager : MonoBehaviour
             FinishedHandler handler = Finished;
             if (handler != null)
                 handler(stopped,name);
+            loadingTasks.RemoveAt(0);
+            if (loadingTasks.Count > 0) {
+                loadingTasks[0].StartConroutine();
+            }
         }
     }
 
     static TaskManager singleton;
 
+    static protected List<TaskManager.TaskState> loadingTasks = new List<TaskManager.TaskState>();
     public static TaskState CreateTask(IEnumerator coroutine,string name)
     {
         Debug.Log("CreateTask = "+name+coroutine.ToString());
