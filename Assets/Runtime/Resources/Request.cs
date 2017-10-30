@@ -10,12 +10,17 @@ namespace Assets.Runtime
         public string path;
         public string[] dependencies;
 
+        public System.DateTime beginQueueTime;
+        public System.DateTime beginLoadTime;
+
         public Request(string bundleName, string assetName, string path,string[] dependencies)
         {
             this.bundleName = bundleName;
             this.assetName = assetName;
             this.path = path;
             this.dependencies = dependencies;
+            beginQueueTime = System.DateTime.Now;
+            beginLoadTime = System.DateTime.Now; 
         }
     }
 }

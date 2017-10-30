@@ -12,10 +12,10 @@ namespace Assets.Runtime
         ///// 正在加载的资源列表 key为AssetName
         ///// </summary>
         //private static Dictionary<string, Request> assetLoadingList = new Dictionary<string, Request>();
-        ///// <summary>
-        ///// 正在加载的AB列表 key为BundleName
-        ///// </summary>
-        //private static Dictionary<string, Request> bundleLoadingList = new Dictionary<string, Request>();
+        /// <summary>
+        /// 正在加载的AB列表 key为BundleName
+        /// </summary>
+        private static List<string> bundleLoadingList = new List<string>();
         /// <summary>
         /// AB缓存
         /// </summary>
@@ -54,6 +54,7 @@ namespace Assets.Runtime
             else {
                 loadAssetCallBack = new List<LoadAssetCallbacks>();
                 loadAssetCallBack.Add(callback);
+                MLog.D("loadAssetCallBack = " + loadAssetCallBack);
                 callBacks.Add(assetName, loadAssetCallBack);
                 startTask(LoadAssets(request), assetName);
             }
@@ -66,9 +67,8 @@ namespace Assets.Runtime
         /// <param name="name"></param>
         private void startTask(IEnumerator coroutine, string name)
         {
-            TaskManager.TaskState state = TaskManager.CreateTask(coroutine, name);
-            state.Finished += finishLoad;
-            state.Start();
+            TaskManager.TaskState state = TaskManager.StartTask(coroutine, name);
+            state.FinishedHandler = finishLoad;
         }
 
 
@@ -85,6 +85,8 @@ namespace Assets.Runtime
                 BaseObject<Object> assetObject = assetPool.Spawn(name);
                 List<LoadAssetCallbacks> loadAssetCallBack;
                 callBacks.TryGetValue(name, out loadAssetCallBack);
+                MLog.D("LoadAssetSuccessCallback = " + name);
+                MLog.D("LoadAssetSuccessCallback = " + loadAssetCallBack);
                 if (loadAssetCallBack != null)
                 {
                     
@@ -103,39 +105,59 @@ namespace Assets.Runtime
         }
 
 
-        private IEnumerator loadAB(string bundleName)
-        {
-            BaseObject<AssetBundle> bundleObject = bundlePool.Spawn(bundleName);
-            if (bundleObject == null)
-            {
-                var bundleLoadRequest = AssetBundle.LoadFromFileAsync(UUtils.GetStreamingAssets(bundleName));
-                yield return bundleLoadRequest;
-
-                var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
-                if (myLoadedAssetBundle == null)
-                {
-                    MLog.E("Failed to load AssetBundle!");
-                    yield break;
-                }
-                bundleObject = new ResourceObject<AssetBundle>(bundleName, myLoadedAssetBundle, bundleReleaseHelper);
-                bundlePool.Add(bundleName, bundleObject);
-            }
-        
-        }
 
         public IEnumerator LoadAssets(Request request)
         {
-            if (request.dependencies != null) {
-                for (int i = 0, len = request.dependencies.Length; i < len; i++) {
-                    yield return loadAB(request.dependencies[i]);
-                }
-            }
-            yield return loadAB(request.bundleName);
+            Debug.Log("frameCount0  " + Time.frameCount);
             //加载AssetBundle阶段
-            BaseObject<AssetBundle> bundleObject = bundlePool.Spawn(request.bundleName);
+            request.beginLoadTime = System.DateTime.Now;
+            int len = 1;
+            if (request.dependencies != null) {
+                len += request.dependencies.Length;
+            }
+            for (int i = 0; i < len; i++)
+            {
+                string bundleName;
+                if (i == len - 1)
+                {
+                    bundleName = request.bundleName;
+                }
+                else {
+                    bundleName = request.dependencies[i];
+                }
+                
+                var bundleObject = bundlePool.Spawn(bundleName);
+                if (bundleObject == null)
+                {
+                    Debug.Log("LoadAssets  " + bundleName);
+                    //bundleLoadingList.Add(bundleName);
+                    var bundleLoadRequest = AssetBundle.LoadFromFileAsync(UUtils.GetStreamingAssets(bundleName));
+                    yield return bundleLoadRequest;
+
+                    var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
+                    if (myLoadedAssetBundle == null)
+                    {
+                        MLog.E("Failed to load AssetBundle!");
+                        yield break;
+                    }
+                    bundleObject = new ResourceObject<AssetBundle>(bundleName, myLoadedAssetBundle, bundleReleaseHelper);
+                    bundlePool.Add(bundleName, bundleObject);
+                    Debug.Log("bundlePool add  " + bundleName);
+                    //bundleLoadingList.Remove(bundleName);
+                }
+                
+            }
+
+            Debug.Log("frameCount1 " + Time.frameCount);
+            var now = System.DateTime.Now;
+            var dt1 = now - request.beginQueueTime;
+            var dt2 = now - request.beginLoadTime;
+            Debug.LogFormat("wao load bundle Request(bundle={0}, alltime={1},loadtime={2}", request.bundleName, dt1.TotalSeconds,dt2.TotalSeconds);
+            request.beginLoadTime = System.DateTime.Now;
             //加载Asset阶段
             BaseObject<Object> assetObject = assetPool.Spawn(request.assetName);
             if (assetObject == null) {
+                var bundleObject = bundlePool.Spawn(request.bundleName);
                 AssetBundle assetBundle = bundleObject.Target;
                 var assetLoadRequest = assetBundle.LoadAssetAsync(request.assetName);
                 yield return assetLoadRequest;
@@ -147,7 +169,11 @@ namespace Assets.Runtime
                 assetObject = new ResourceObject<Object>(request.bundleName, assetLoadRequest.asset,objectReleaseHelper);
                 assetPool.Add(request.assetName, assetObject);
             }
-
+            now = System.DateTime.Now;
+            dt1 = now - request.beginQueueTime;
+            dt2 = now - request.beginLoadTime;
+            Debug.LogFormat("wao load Asset(bundle={0}, alltime={1},loadtime={2}", request.assetName, dt1.TotalSeconds, dt2.TotalSeconds);
+            Debug.Log("frameCount2 " + Time.frameCount);
         }
 
 
