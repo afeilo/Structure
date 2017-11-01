@@ -55,84 +55,81 @@
 
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System;
 
 /// A Task object represents a coroutine.  Tasks can be started, paused, and stopped.
 /// It is an error to attempt to start a task that has been stopped or which has
 /// naturally terminated.
-//public class Task
-//{
-//    /// Returns true if and only if the coroutine is running.  Paused tasks
-//    /// are considered to be running.
-//    public bool Running
-//    {
-//        get
-//        {
-//            return task.Running;
-//        }
-//    }
+public class Task
+{
+    /// Returns true if and only if the coroutine is running.  Paused tasks
+    /// are considered to be running.
+    public bool Running
+    {
+        get
+        {
+            return task.Running;
+        }
+    }
 
-//    /// Returns true if and only if the coroutine is currently paused.
-//    public bool Paused
-//    {
-//        get
-//        {
-//            return task.Paused;
-//        }
-//    }
+    /// Returns true if and only if the coroutine is currently paused.
+    public bool Paused
+    {
+        get
+        {
+            return task.Paused;
+        }
+    }
 
-//    /// Delegate for termination subscribers.  manual is true if and only if
-//    /// the coroutine was stopped with an explicit call to Stop().
-//    public delegate void FinishedHandler(bool manual,string name);
+    /// Delegate for termination subscribers.  manual is true if and only if
+    /// the coroutine was stopped with an explicit call to Stop().
+    public delegate void FinishedHandler(bool manual,string name);
 
-//    /// Termination event.  Triggered when the coroutine completes execution.
-//    public event FinishedHandler Finished;
+    /// Termination event.  Triggered when the coroutine completes execution.
+    public event FinishedHandler Finished;
 
-//    /// Creates a new Task object for the given coroutine.
-//    ///
-//    /// If autoStart is true (default) the task is automatically started
-//    /// upon construction.
-//    public Task(IEnumerator c,string name,bool autoStart = true)
-//    {
-//        task = TaskManager.CreateTask(c,name);
-//        task.Finished += TaskFinished;
-//        if (autoStart)
-//            Start();
-//    }
+    /// Creates a new Task object for the given coroutine.
+    ///
+    /// If autoStart is true (default) the task is automatically started
+    /// upon construction.
+    public Task(IEnumerator c,string name,bool autoStart = true)
+    {
+        task = TaskManager.CreateTask(c,name);
+        task.Finished += TaskFinished;
+        if (autoStart)
+            Start();
+    }
 
-//    /// Begins execution of the coroutine
-//    public void Start()
-//    {
-//            task.Start();
-        
-//    }
+    /// Begins execution of the coroutine
+    public void Start()
+    {
+        task.Start();
+    }
 
-//    /// Discontinues execution of the coroutine at its next yield.
-//    public void Stop()
-//    {
-//        task.Stop();
-//    }
+    /// Discontinues execution of the coroutine at its next yield.
+    public void Stop()
+    {
+        task.Stop();
+    }
 
-//    public void Pause()
-//    {
-//        task.Pause();
-//    }
+    public void Pause()
+    {
+        task.Pause();
+    }
 
-//    public void Unpause()
-//    {
-//        task.Unpause();
-//    }
+    public void Unpause()
+    {
+        task.Unpause();
+    }
 
-//    void TaskFinished(bool manual,string name)
-//    {
-//        FinishedHandler handler = Finished;
-//        if (handler != null)
-//            handler(manual,name);
-//    }
+    void TaskFinished(bool manual,string name)
+    {
+        FinishedHandler handler = Finished;
+        if (handler != null)
+            handler(manual,name);
+    }
 
-//    TaskManager.TaskState task;
-//}
+    TaskManager.TaskState task;
+}
 
 class TaskManager : MonoBehaviour
 {
@@ -154,14 +151,14 @@ class TaskManager : MonoBehaviour
             }
         }
 
-        //public delegate void FinishedHandler(bool manual, string name);
-        public Action<bool,string> FinishedHandler;
-        //public event FinishedHandler Finished;
-        public IEnumerator coroutine;
-        public string name;
-        private bool running;
-        private bool paused;
-        private bool stopped;
+        public delegate void FinishedHandler(bool manual,string name);
+        public event FinishedHandler Finished;
+
+        IEnumerator coroutine;
+        string name;
+        bool running;
+        bool paused;
+        bool stopped;
 
         public TaskState(IEnumerator c,string n)
         {
@@ -169,93 +166,58 @@ class TaskManager : MonoBehaviour
             name = n;
         }
 
-        private void Pause()
+        public void Pause()
         {
             paused = true;
         }
 
-        private void Unpause()
+        public void Unpause()
         {
             paused = false;
         }
 
-        private void Start()
+        public void Start()
         {
-            //loadingTasks.Add(this);
-            //Debug.Log(loadingTasks.Count);
-            if (loadingTasks.Count == 1) {
-                StartConroutine();
-            }
-            
-        }
-        private void StartConroutine() {
-            Debug.Log("StartConroutine  " + Time.frameCount);
-            //singleton.StartCoroutine(CallWrapper());
             running = true;
+            singleton.StartCoroutine(CallWrapper());
         }
-        private void Stop()
+
+        public void Stop()
         {
             stopped = true;
             running = false;
         }
 
-    }
-    //public event FinishedHandler Finished;
-
-    //public delegate void FinishedHandler(bool manual, string name);
-
-
-    public bool running;
-    public bool paused;
-    public bool stopped;
-
-    private IEnumerator CallWrapper()
-    {
-        //yield return true;
-        //MLog.D("CallWrapper");
-        running = true;
-        IEnumerator e = null;
-        TaskManager.TaskState task = null;
-        while (running)
-        {    
-            if (e==null)
+        IEnumerator CallWrapper()
+        {
+            //yield return null;
+            IEnumerator e = coroutine;
+            while (running)
             {
-                if (loadingTasks.Count == 0) {
-                    running = false;
-                    break;
-                }
-                task = loadingTasks.Dequeue();
-                e = task.coroutine;
-            }
-            if (paused)
-                yield return null;
-            else
-            {
-                if (e != null && e.MoveNext())
-                {
-                    //todo 
-                    //这里会在下一帧执行，需替换方案
-                    yield return e.Current;
-                }
+                if (paused)
+                    yield return null;
                 else
                 {
-                    //task.FinishedHandler handler = task.Finished;
-                    if (task.FinishedHandler != null)
-                        task.FinishedHandler(stopped, task.name);
-                    e = null;
-                 }
+                    if (e != null && e.MoveNext())
+                    {
+                        yield return e.Current;
+                    }
+                    else
+                    {
+                        running = false;
+                    }
+                }
             }
+
+            FinishedHandler handler = Finished;
+            if (handler != null)
+                handler(stopped,name);
         }
     }
 
-    private void startTasks() {
-        StartCoroutine(CallWrapper());
-    }
+    static TaskManager singleton;
 
-    public static TaskManager singleton;
-
-    static protected Queue<TaskManager.TaskState> loadingTasks = new Queue<TaskManager.TaskState>();
-    public static TaskManager.TaskState StartTask(IEnumerator coroutine, string name)
+    public static TaskState CreateTask(IEnumerator coroutine,string name)
     {
         Debug.Log("CreateTask = "+name+coroutine.ToString());
         if (singleton == null)
@@ -263,12 +225,6 @@ class TaskManager : MonoBehaviour
             GameObject go = new GameObject("TaskManager");
             singleton = go.AddComponent<TaskManager>();
         }
-        TaskState task = new TaskState(coroutine, name);
-        loadingTasks.Enqueue(task);
-        if (singleton.running == false)
-        {
-            singleton.startTasks();
-        }
-        return task;
+        return new TaskState(coroutine,name);
     }
 }

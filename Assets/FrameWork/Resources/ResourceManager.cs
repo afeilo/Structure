@@ -14,7 +14,6 @@ namespace Assets.FrameWork
 
         void Awake(){
             //TODO 指定一个默认的加载器
-           
             instance = this;
         }
 
@@ -30,6 +29,7 @@ namespace Assets.FrameWork
         public void LoadAsset(string bundleName,string assetName, LoadAssetCallbacks loadAssetCallBack) {
             this.LoadAsset(bundleName, assetName, loadAssetCallBack, null);
         }
+
         /// <summary>
         /// 异步加载资源
         /// </summary>
@@ -39,14 +39,15 @@ namespace Assets.FrameWork
         public void LoadAsset(string bundleName, string assetName, LoadAssetCallbacks loadAssetCallBack, object userData)
         {
             resourceLoader.LoadAsset(bundleName, assetName, loadAssetCallBack);
-
         }
+
         /// <summary>
         /// 卸载资源
         /// </summary>
         /// <param name="asset"></param>
         public void UnloadAsset(object asset) { 
         }
+
         /// <summary>
         /// 异步加载场景。
         /// </summary>
