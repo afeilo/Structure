@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Assets.Runtime
 {
@@ -15,7 +16,7 @@ namespace Assets.Runtime
         /// <summary>
         /// 正在加载的AB列表 key为BundleName
         /// </summary>
-        private static List<string> bundleLoadingList = new List<string>();
+        private static Dictionary<string, AsyncOperation> bundleLoadingList = new Dictionary<string, AsyncOperation>();
         /// <summary>
         /// AB缓存
         /// </summary>
@@ -42,9 +43,9 @@ namespace Assets.Runtime
         /// </summary>
         /// <param name="name"></param>
         /// <param name="onComplete"></param>AssetLoader
-        public override void LoadAsset(string bundleName, string assetName, string[] dependencies, LoadAssetCallbacks callback)
+        public override void LoadAsset(string bundleName, string assetName, string[] dependencies, LoadAssetCallbacks callback, REQUEST_TYPE requestType = REQUEST_TYPE.FILE)
         {
-            Request request = GetRequest(bundleName, assetName,dependencies, null);
+            Request request = GetRequest(bundleName, assetName, dependencies, requestType);
             List<LoadAssetCallbacks> loadAssetCallBack;
             callBacks.TryGetValue(assetName, out loadAssetCallBack);
             if (loadAssetCallBack != null)
@@ -54,7 +55,6 @@ namespace Assets.Runtime
             else {
                 loadAssetCallBack = new List<LoadAssetCallbacks>();
                 loadAssetCallBack.Add(callback);
-                MLog.D("loadAssetCallBack = " + loadAssetCallBack);
                 callBacks.Add(assetName, loadAssetCallBack);
                 startTask(LoadAssets(request), assetName);
             }
@@ -67,8 +67,10 @@ namespace Assets.Runtime
         /// <param name="name"></param>
         private void startTask(IEnumerator coroutine, string name)
         {
-            TaskManager.TaskState state = TaskManager.StartTask(coroutine, name);
-            state.FinishedHandler = finishLoad;
+            MLog.D(name);
+            TaskManager.TaskState state = TaskManager.CreateTask(coroutine, name);
+            state.Start();
+            state.Finished += finishLoad;
         }
 
 
@@ -129,30 +131,59 @@ namespace Assets.Runtime
                 var bundleObject = bundlePool.Spawn(bundleName);
                 if (bundleObject == null)
                 {
-                    Debug.Log("LoadAssets  " + bundleName);
+                    AsyncOperation asyncOperation;
+                    bundleLoadingList.TryGetValue(bundleName, out asyncOperation);
                     //bundleLoadingList.Add(bundleName);
-                    var bundleLoadRequest = AssetBundle.LoadFromFileAsync(UUtils.GetStreamingAssets(bundleName));
-                    yield return bundleLoadRequest;
-
-                    var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
-                    if (myLoadedAssetBundle == null)
+                    if (asyncOperation == null)
                     {
-                        MLog.E("Failed to load AssetBundle!");
-                        yield break;
+                        AssetBundle myLoadedAssetBundle = null;
+
+                        //这里请求本地或者网络是根据
+                        if (request.requestType == REQUEST_TYPE.FILE)
+                        {
+                            //本地请求
+                            var bundleLoadRequest = AssetBundle.LoadFromFileAsync(UUtils.GetStreamingAssets(bundleName));
+                            asyncOperation = bundleLoadRequest;
+                            bundleLoadingList.Add(bundleName, asyncOperation);
+                            yield return bundleLoadRequest;
+                            myLoadedAssetBundle = bundleLoadRequest.assetBundle;
+
+                        }
+                        else {
+                            //网络请求
+                            MLog.D(UUtils.GetRemoteAssets(bundleName));
+                            var unityWebRequest = UnityWebRequest.GetAssetBundle(UUtils.GetRemoteAssets(bundleName),1,0);
+                            asyncOperation = unityWebRequest.Send();
+                            bundleLoadingList.Add(bundleName, asyncOperation);
+                            yield return asyncOperation;
+                            myLoadedAssetBundle = DownloadHandlerAssetBundle.GetContent(unityWebRequest);
+                        }
+                        if (myLoadedAssetBundle == null)
+                        {
+                            MLog.E("Failed to load AssetBundle!");
+                            yield break;
+                        }
+                        bundleObject = new ResourceObject<AssetBundle>(bundleName, myLoadedAssetBundle, bundleReleaseHelper);
+                        bundlePool.Add(bundleName, bundleObject);
+                        bundleLoadingList.Remove(bundleName);
+                        Debug.Log("bundlePool add  " + bundleName);
                     }
-                    bundleObject = new ResourceObject<AssetBundle>(bundleName, myLoadedAssetBundle, bundleReleaseHelper);
-                    bundlePool.Add(bundleName, bundleObject);
-                    Debug.Log("bundlePool add  " + bundleName);
-                    //bundleLoadingList.Remove(bundleName);
+                    else {
+                        while (!asyncOperation.isDone)
+                        {
+                            yield return null;
+                        }
+                    }
                 }
                 
             }
-
+#if DEBUG_ASSET
             Debug.Log("frameCount1 " + Time.frameCount);
             var now = System.DateTime.Now;
             var dt1 = now - request.beginQueueTime;
             var dt2 = now - request.beginLoadTime;
             Debug.LogFormat("wao load bundle Request(bundle={0}, alltime={1},loadtime={2}", request.bundleName, dt1.TotalSeconds,dt2.TotalSeconds);
+#endif
             request.beginLoadTime = System.DateTime.Now;
             //加载Asset阶段
             BaseObject<Object> assetObject = assetPool.Spawn(request.assetName);
@@ -169,11 +200,13 @@ namespace Assets.Runtime
                 assetObject = new ResourceObject<Object>(request.bundleName, assetLoadRequest.asset,objectReleaseHelper);
                 assetPool.Add(request.assetName, assetObject);
             }
+#if DEBUG_ASSET
             now = System.DateTime.Now;
             dt1 = now - request.beginQueueTime;
             dt2 = now - request.beginLoadTime;
             Debug.LogFormat("wao load Asset(bundle={0}, alltime={1},loadtime={2}", request.assetName, dt1.TotalSeconds, dt2.TotalSeconds);
             Debug.Log("frameCount2 " + Time.frameCount);
+#endif
         }
 
 
@@ -184,12 +217,9 @@ namespace Assets.Runtime
         /// <param name="assetName"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public Request GetRequest(string bundleName,string assetName,string[] dependencies, string path)
+        public Request GetRequest(string bundleName, string assetName, string[] dependencies,REQUEST_TYPE requestType)
         {
-            if (path == null)
-                return new Request(bundleName, assetName, UUtils.GetStreamingAssets(bundleName), dependencies);
-            else
-                return new Request(bundleName, assetName, path, dependencies);
+                return new Request(bundleName, assetName, dependencies, requestType);
         }
     }
 

@@ -15,6 +15,6 @@ public class ABController{
 		} else {
 			Directory.CreateDirectory (path);
 		}
-		BuildPipeline.BuildAssetBundles(path, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows64);
+		BuildPipeline.BuildAssetBundles(path, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.Android);
 	}
 }

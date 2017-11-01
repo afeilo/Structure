@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.Runtime
 {
-    class DefualtStateHelper : MonoBehaviour,IStateHelper
+    class DefaultStateHelper : MonoBehaviour,IStateHelper
     {
         /// <summary>
         /// 实例化object 并返回实例

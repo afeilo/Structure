@@ -15,6 +15,11 @@ namespace Assets.FrameWork
         /// <param name="bundleName"></param>
         /// <param name="assetName"></param>
         /// <param name="callback"></param>
-        public abstract void LoadAsset(string bundleName, string assetName,string[] dependencies, LoadAssetCallbacks callback);
+        public abstract void LoadAsset(string bundleName, string assetName,string[] dependencies, LoadAssetCallbacks callback,REQUEST_TYPE request = REQUEST_TYPE.FILE);
+    }
+    public enum REQUEST_TYPE
+    {
+        FILE,
+        HTTP
     }
 }

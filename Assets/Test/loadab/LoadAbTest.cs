@@ -15,21 +15,21 @@ public class LoadAbTest : MonoBehaviour {
 	}
     public void load() {
         begin = System.DateTime.Now;
-        assetLoader.LoadAsset("pic", "p1",null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p2", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p3", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p4", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p5", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p6", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p7", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p8", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p9", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p10", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p11", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p12", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p13", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p14", null, loadAssetCallback);
-        assetLoader.LoadAsset("pic", "p15", null, loadAssetCallback);
+        assetLoader.LoadAsset("pic1", "p1",null, loadAssetCallback, REQUEST_TYPE.HTTP);
+        assetLoader.LoadAsset("pic2", "p2", null, loadAssetCallback, REQUEST_TYPE.HTTP);
+        assetLoader.LoadAsset("pic3", "p3", null, loadAssetCallback, REQUEST_TYPE.HTTP);
+        //assetLoader.LoadAsset("pic4", "p4", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic5", "p5", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic6", "p6", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic7", "p7", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic8", "p8", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic9", "p9", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic10", "p10", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic11", "p11", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic12", "p12", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic13", "p13", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic14", "p14", null, loadAssetCallback);
+        //assetLoader.LoadAsset("pic15", "p15", null, loadAssetCallback);
     }
 
     /// <summary>

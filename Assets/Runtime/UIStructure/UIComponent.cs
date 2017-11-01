@@ -13,7 +13,7 @@ namespace Assets.Runtime.UIStructure
         private void Awake()
         {
             m_UIManager = FrameWorkHelper.getModule<UIStateManager>();
-            m_UIManager.SetStateHelper(new DefualtStateHelper());
+            m_UIManager.SetStateHelper(new DefaultStateHelper());
         }
         private void Start() {
             m_UIManager.SetResourceManager(FrameWorkHelper.getModule<ResourceManager>());
