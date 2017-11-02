@@ -18,9 +18,9 @@ public class LoadAbTest : MonoBehaviour {
         assetLoader.LoadAsset("pic1", "p1",null, loadAssetCallback, REQUEST_TYPE.HTTP);
         assetLoader.LoadAsset("pic2", "p2", null, loadAssetCallback, REQUEST_TYPE.HTTP);
         assetLoader.LoadAsset("pic3", "p3", null, loadAssetCallback, REQUEST_TYPE.HTTP);
-        //assetLoader.LoadAsset("pic4", "p4", null, loadAssetCallback);
-        //assetLoader.LoadAsset("pic5", "p5", null, loadAssetCallback);
-        //assetLoader.LoadAsset("pic6", "p6", null, loadAssetCallback);
+        assetLoader.LoadAsset("pic4", "p4", null, loadAssetCallback);
+        assetLoader.LoadAsset("pic5", "p5", null, loadAssetCallback);
+        assetLoader.LoadAsset("pic6", "p6", null, loadAssetCallback);
         //assetLoader.LoadAsset("pic7", "p7", null, loadAssetCallback);
         //assetLoader.LoadAsset("pic8", "p8", null, loadAssetCallback);
         //assetLoader.LoadAsset("pic9", "p9", null, loadAssetCallback);

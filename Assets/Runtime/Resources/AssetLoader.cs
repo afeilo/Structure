@@ -107,7 +107,11 @@ namespace Assets.Runtime
         }
 
 
-
+		/// <summary>
+		/// Loads the assets.
+		/// </summary>
+		/// <returns>The assets.</returns>
+		/// <param name="request">Request.</param>
         public IEnumerator LoadAssets(Request request)
         {
             Debug.Log("frameCount0  " + Time.frameCount);
@@ -157,6 +161,8 @@ namespace Assets.Runtime
                             bundleLoadingList.Add(bundleName, asyncOperation);
                             yield return asyncOperation;
                             myLoadedAssetBundle = DownloadHandlerAssetBundle.GetContent(unityWebRequest);
+							unityWebRequest.Dispose ();
+							unityWebRequest = null;
                         }
                         if (myLoadedAssetBundle == null)
                         {
