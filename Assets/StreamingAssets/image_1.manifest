@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 2820947089
+CRC: 4241352066
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: a8dcaf102da78036c9ee121393c04a0c
+    Hash: 9136f7679e68787c0b7d7d664e2b9a13
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 6ab6220188aeb1ae427f50d10b9a0f70
+    Hash: 7a9f72b79bb790ad2ab5268169c5d340
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -15,13 +15,10 @@ ClassTypes:
   Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 - Class: 115
   Script: {instanceID: 0}
-- Class: 213
-  Script: {instanceID: 0}
 - Class: 222
   Script: {instanceID: 0}
 - Class: 224
   Script: {instanceID: 0}
 Assets:
 - Assets/UI/image.prefab
-Dependencies:
-- E:/Structure/Assets/StreamingAssets/image
+Dependencies: []

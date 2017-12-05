@@ -50,12 +50,12 @@ namespace Assets.FrameWork
         /// 设置当前页面
         /// </summary>
         /// <param name="stateId"></param>
-        public void SetCurrentView(string abName)
+        public void SetCurrentView(string abName,string assetName)
         {
             if (currentUIState != null)
                 currentUIState.PagePause();
             //  StateObject stateObject = StateRejester.getInstance().getStateObject(stateId);
-            mResourceManager.LoadAsset(abName, abName, loadAssetCallback);
+            mResourceManager.LoadAsset(abName, assetName, loadAssetCallback);
         }
 
         /// <summary>

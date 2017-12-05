@@ -26,6 +26,7 @@ namespace Assets.Runtime
         public virtual void PageResume()
         {
             MLog.D("PageResume");
+            gameObject.SetActive(true);
         }
 
         public virtual void PageStart()
@@ -36,6 +37,7 @@ namespace Assets.Runtime
         public virtual void PageStop()
         {
             MLog.D("PageStop");
+            gameObject.SetActive(false);
         }
 
         public virtual void PageDestory()

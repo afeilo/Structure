@@ -9,7 +9,7 @@ namespace Assets.FrameWork
         /// 切换界面
         /// </summary>
         /// <param name="stateId"></param>
-        void SetCurrentView(string abName);
+        void SetCurrentView(string abName,string assetName);
 
         /// <summary>
         /// 返回到上一个界面
