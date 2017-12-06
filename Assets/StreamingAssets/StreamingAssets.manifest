@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 1887262222
+CRC: 193145782
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -16,4 +16,16 @@ AssetBundleManifest:
       Dependencies: {}
     Info_4:
       Name: versionfile
+      Dependencies: {}
+    Info_5:
+      Name: page1
+      Dependencies: {}
+    Info_6:
+      Name: page2
+      Dependencies: {}
+    Info_7:
+      Name: popwindow
+      Dependencies: {}
+    Info_8:
+      Name: ui_canvas
       Dependencies: {}

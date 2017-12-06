@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 203487277
+CRC: 975078928
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 6b6a0f964552f96cd208f69ba87a74e8
+    Hash: 41309c417675b04a8a03ef1722ca2385
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 3d1c7a7dee9026e640135e14e149ad64
+    Hash: fa2254006e0ed9ef06bda850c10a2500
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -18,15 +18,15 @@ ClassTypes:
 - Class: 48
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+- Class: 114
   Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 - Class: 114
-  Script: {fileID: 708705254, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 2023ed19dc143f142a49d6dbb6c372a6, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: f2eed9bb9b405d34bb0665b7b53fa2ba, type: 3}
-- Class: 114
-  Script: {fileID: 11500000, guid: 59d9111c75e15784cb6cd78e5cb46fda, type: 3}
+  Script: {fileID: 11500000, guid: 796852c07b911c5439896776f408ef3c, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 128
@@ -38,6 +38,5 @@ ClassTypes:
 - Class: 224
   Script: {instanceID: 0}
 Assets:
-- Assets/UI/baseui_1.prefab
-Dependencies:
-- E:/Structure/Assets/StreamingAssets/image
+- Assets/UI/popwindow.prefab
+Dependencies: []

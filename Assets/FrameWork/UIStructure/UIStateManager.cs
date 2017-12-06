@@ -55,47 +55,20 @@ namespace Assets.FrameWork
             if (currentUIState != null)
                 currentUIState.PagePause();
             //  StateObject stateObject = StateRejester.getInstance().getStateObject(stateId);
-            mResourceManager.LoadAsset(abName, assetName, loadAssetCallback);
-        }
-
-        /// <summary>
-        /// 加载成功
-        /// </summary>
-        /// <param name="obj"></param>
-        private void loadSuccess(string abname, System.Object obj)
-        {
-            MLog.D("loadSuccess");
-            GameObject gameObject = stateHelper.InstantObject(obj) as GameObject;
-            //todo
-            IStateView view = stateHelper.BindView(gameObject, abname);
-            recentView.Add(abname, view);
-            gameObject.name = abname;
-            view.PageCreate();
-            if (!view.IsPopupWindow())
-            {
-                if (currentUIState != null)
-                    currentUIState.PageStop();
+            IStateView view;
+            recentView.TryGetValue(assetName, out view);
+            if (null != view){
+                showNewView(view);
             }
-            view.PageResume();
-            if (currentUIState != null) listStack.Push(currentUIState);
-            currentUIState = view;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="errorMessage"></param>
-        private void loadFail(string name, string errorMessage)
-        {
+            else {
+                mResourceManager.LoadAsset(abName, assetName, loadAssetCallback);
+            }
 
         }
 
-        /// <summary>
-        /// 返回上一页
-        /// </summary>
         public void GoBack()
         {
+            MLog.D("goback");
             IStateView newStateView = listStack.Pop() as IStateView;
             currentUIState.PagePause();
             if (newStateView != null)
@@ -115,10 +88,61 @@ namespace Assets.FrameWork
 
         }
 
+
+
         public IStateView getCurrentView()
         {
             return currentUIState;
         }
+
+        private void showNewView(IStateView view) {
+            if (currentUIState == null) {
+                view.PageStart();
+                view.PageResume();
+                currentUIState = view;
+                return;
+            }
+            currentUIState.PagePause();
+            if (!view.IsPopupWindow())
+            {
+                currentUIState.PageStop();
+            }
+            view.PageStart();
+            view.PageResume();
+            listStack.Push(currentUIState); 
+            currentUIState = view;
+        }
+
+        /// <summary>
+        /// 加载成功
+        /// </summary>
+        /// <param name="obj"></param>
+        private void loadSuccess(string abname, System.Object obj)
+        {
+            MLog.D("loadSuccess");
+            GameObject gameObject = stateHelper.InstantObject(obj) as GameObject;
+            //todo
+            IStateView view = stateHelper.BindView(gameObject, abname);
+            recentView.Add(abname, view);
+            gameObject.name = abname;
+            view.PageCreate();
+            showNewView(view);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="errorMessage"></param>
+        private void loadFail(string name, string errorMessage)
+        {
+
+        }
+
+        /// <summary>
+        /// 返回上一页
+        /// </summary>
+
 
 
         #endregion

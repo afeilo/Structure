@@ -88,7 +88,6 @@ namespace Assets.Runtime
                 List<LoadAssetCallbacks> loadAssetCallBack;
                 callBacks.TryGetValue(name, out loadAssetCallBack);
                 MLog.D("LoadAssetSuccessCallback = " + name);
-                MLog.D("LoadAssetSuccessCallback = " + loadAssetCallBack);
                 if (loadAssetCallBack != null)
                 {
                     
@@ -96,7 +95,6 @@ namespace Assets.Runtime
                     {
                         if (loadAssetCallBack[i] != null)
                         {
-                            MLog.D("LoadAssetSuccessCallback = " + name);
                             loadAssetCallBack[i].LoadAssetSuccessCallback(name, assetObject.Target);
                         }
 
@@ -114,7 +112,7 @@ namespace Assets.Runtime
 		/// <param name="request">Request.</param>
         public IEnumerator LoadAssets(Request request)
         {
-            Debug.Log("frameCount0  " + Time.frameCount);
+            MLog.D("frameCount0  " + Time.frameCount);
             //加载AssetBundle阶段
             request.beginLoadTime = System.DateTime.Now;
             int len = 1;
@@ -213,6 +211,8 @@ namespace Assets.Runtime
             Debug.LogFormat("wao load Asset(bundle={0}, alltime={1},loadtime={2}", request.assetName, dt1.TotalSeconds, dt2.TotalSeconds);
             Debug.Log("frameCount2 " + Time.frameCount);
 #endif
+            yield return false;
+            MLog.D("load over frame  " + Time.frameCount);
         }
 
 

@@ -9,7 +9,7 @@ namespace Assets.Runtime
 {
     class UIComponent : ComponentModule
     {
-        private UIStateManager m_UIManager;
+        private IStateManager m_UIManager;
         protected override void Awake()
         {
             base.Awake();
@@ -28,6 +28,13 @@ namespace Assets.Runtime
         public void Open(string pageName) {
             m_UIManager.SetCurrentView(pageName, pageName);
         }
-        
+
+        /// <summary>
+        /// 退出当前页
+        /// </summary>
+        public void GoBack()
+        {
+            m_UIManager.GoBack();
+        }
     }
 }

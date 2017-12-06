@@ -6,32 +6,26 @@ namespace Assets.Runtime
 {
     public class UIStateView : MonoBehaviour, IStateView
     {
-
+        public bool isPopupWindow = false;
         // Use this for initialization
-        private void Start()
-        {
-            MLog.D("Start");
-        }
 
         public virtual void PageCreate()
         {
             MLog.D("PageCreate");
         }
+        public virtual void PageStart()
+        {
+            gameObject.SetActive(true);
+            MLog.D("PageResume");
+        }
+        public virtual void PageResume()
+        {
+            MLog.D("PageResume");
+        }
 
         public virtual void PagePause()
         {
             MLog.D("PagePause");
-        }
-
-        public virtual void PageResume()
-        {
-            MLog.D("PageResume");
-            gameObject.SetActive(true);
-        }
-
-        public virtual void PageStart()
-        {
-            MLog.D("PageResume");
         }
 
         public virtual void PageStop()
@@ -47,7 +41,7 @@ namespace Assets.Runtime
 
         public bool IsPopupWindow()
         {
-            return false;
+            return isPopupWindow;
         }
 
 
