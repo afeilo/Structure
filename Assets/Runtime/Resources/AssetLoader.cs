@@ -154,7 +154,7 @@ namespace Assets.Runtime
                         else {
                             //网络请求
                             MLog.D(UUtils.GetRemoteAssets(bundleName));
-                            var unityWebRequest = UnityWebRequest.GetAssetBundle(UUtils.GetRemoteAssets(bundleName),1,0);
+                            var unityWebRequest = UnityWebRequestAssetBundle.GetAssetBundle(UUtils.GetRemoteAssets(bundleName),1,0);
                             asyncOperation = unityWebRequest.Send();
                             bundleLoadingList.Add(bundleName, asyncOperation);
                             yield return asyncOperation;

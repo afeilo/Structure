@@ -21,16 +21,5 @@ namespace Assets.FrameWork
         /// </summary>
         /// <returns></returns>
         IStateView getCurrentView();
-
-        /// <summary>
-        /// 设置页面Helper
-        /// </summary>
-        /// <param name="helper"></param>
-        void SetStateHelper(IStateHelper helper);
-        /// <summary>
-        /// 设置ResourceManager
-        /// </summary>
-        /// <param name="manager"></param>
-        void SetResourceManager(IResourceManager manager);
     }
 }

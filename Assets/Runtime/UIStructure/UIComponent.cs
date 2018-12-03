@@ -13,9 +13,7 @@ namespace Assets.Runtime
         protected override void Awake()
         {
             base.Awake();
-            m_UIManager = FrameWorkHelper.getModule<UIStateManager>();
-            m_UIManager.SetStateHelper(new DefaultStateHelper());
-            m_UIManager.SetResourceManager(FrameWorkHelper.getModule<ResourceManager>());
+            m_UIManager = PluginModule.GetStateManager();
         }
         private void Start() {
             

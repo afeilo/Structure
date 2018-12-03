@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.FrameWork
 {
-    public class UIStateManager : FrameWorkModule, IStateManager
+    /**这个类应该用来控制页面的状态
+     */
+    public class UIStateManager : Singleton<UIStateManager>,IStateManager
     {
 
         private LoadAssetCallbacks loadAssetCallback;
@@ -26,14 +28,11 @@ namespace Assets.FrameWork
 
         public UIStateManager() {
             loadAssetCallback = new LoadAssetCallbacks(loadSuccess,loadFail);
+            mResourceManager = FrameWorkHelper.getModule<ResourceManager>();
         }
 
         public void SetStateHelper(IStateHelper helper) {
             stateHelper = helper;
-        }
-
-        public void SetResourceManager(IResourceManager manager) {
-            mResourceManager = manager;
         }
 
         /// <summary>
@@ -120,10 +119,10 @@ namespace Assets.FrameWork
         private void loadSuccess(string abname, System.Object obj)
         {
             MLog.D("loadSuccess");
-            GameObject gameObject = stateHelper.InstantObject(obj) as GameObject;
+            GameObject gameObject = GameHelper.GetInstance().InstantiateObject((Object)obj);
             //todo
             IStateView view = stateHelper.BindView(gameObject, abname);
-            recentView.Add(abname, view);
+            // recentView.Add(abname, view);
             gameObject.name = abname;
             view.PageCreate();
             showNewView(view);
