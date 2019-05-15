@@ -17,7 +17,7 @@ namespace Assets.Framework
         /// <param name="assetBundle"></param>
         /// <param name="success"></param>
         /// <param name="err"></param>
-        public abstract void LoadAsset(string name, AssetBundle assetBundle, Action<UnityEngine.Object> success, Action err);
+        public abstract void LoadAsset(string name, AssetBundle assetBundle, Action<UnityEngine.Object> success, Action err, Type type);
 
         public AssetCache GetAsset(string name)
         {

@@ -30,6 +30,35 @@ public class UIMediatorEditor : Editor
 
     protected virtual void DrawComment()
     {
+        Rect dragRect = EditorGUILayout.BeginHorizontal();
+        lk.relativeMediator = EditorGUILayout.TextField(lk.relativeMediator);
+  
+        if (GUILayout.Button("绑定UI", GUILayout.Width(80)))
+        {
+            if (lk.relativeMediator.EndsWith(".cs"))
+            {
+
+            }
+            else
+            {
+                Debug.LogError("请绑定正确脚本");
+            }
+        }
+
+        Event e = Event.current;
+        if (dragRect.Contains(e.mousePosition))
+        {
+            if (e.type == EventType.DragUpdated)
+                DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
+            else if (e.type == EventType.DragPerform)
+            {
+                e.Use();
+                lk.relativeMediator = DragAndDrop.paths[0];
+
+            }
+        }
+
+        EditorGUILayout.EndHorizontal();
     }
 
     protected void DrawLinkerEditor()

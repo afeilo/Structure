@@ -6,9 +6,9 @@ namespace Assets.Framework
     public class Loader
     {
 
-        public static void LoadAsset(string name, Action<UnityEngine.Object> comp, Action error)
+        public static void LoadAsset(string name, Action<UnityEngine.Object> comp, Action error,Type type = null)
         {
-            AssetBundleManager.getInstance().LoadAsset(name, comp);
+            AssetBundleManager.getInstance().LoadAsset(name, comp,error, type);
         }
 
         public static void LoadAssetGroup(string[] names,Action<UnityEngine.Object[]> comp){

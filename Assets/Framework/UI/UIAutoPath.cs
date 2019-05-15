@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Assets.Framework
 {
+    [ExecuteInEditMode]
     public class UIAutoPath : MonoBehaviour
     {
         /// <summary>
@@ -35,13 +36,22 @@ namespace Assets.Framework
         void Start()
         {
             //  Vector3 position = transform.position;
-            transform.SetParent(UIRoot.instance.UIStruct[(int)state], false);
+            Reset();
             //transform.position = position;
+        }
+
+        public void Reset()
+        {
+              transform.SetParent(UIRoot.instance.UIStruct[(int)state], false);
+
         }
 
         // Update is called once per frame
         void Update()
         {
+#if UNITY_EDITOR
+            Reset();
+#endif
 
         }
     }

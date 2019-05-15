@@ -2,7 +2,7 @@
 using System.Collections;
 using System.IO;
 
-public class AssetBundlePathDefine
+public class FilePathDefine
 {
 #if UNITY_IOS
    public const string platform = "ios";
@@ -72,6 +72,35 @@ public class AssetBundlePathDefine
             if (_downloadTempPath == null)
                 _downloadTempPath = Path.Combine(Application.persistentDataPath, "download_tmp");
             return _downloadTempPath;
+        }
+    }
+
+    static string _progressCachePath;
+    public static string progressCachePath
+    {
+        get
+        {
+            if (_progressCachePath == null)
+                _progressCachePath = GetHexPath(Application.persistentDataPath, "pro");
+            return _progressCachePath;
+        }
+    }
+
+    public static string GetHexPath(string dir,string name)
+    {
+        return Path.Combine(dir, name);
+    }
+
+    public static string configPath{
+
+        get
+        {
+#if UNITY_STANDALONE && !UNITY_EDITOR
+            return Path.Combine(Application.dataPath , "Config");
+#elif UNITY_EDITOR
+            return "Assets/AVG/config/files";
+#endif
+            return FilePathDefine.projectExportPath;
         }
     }
 

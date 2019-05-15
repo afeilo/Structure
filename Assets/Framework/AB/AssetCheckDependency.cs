@@ -21,8 +21,8 @@ namespace Assets.Framework
         /// </summary>
         private void loadManifest()
         {
-             foreach(string path in AssetBundlePathDefine.loadedPath){
-                var _path = Path.Combine(path, ALG.EncodeHexString(AssetBundlePathDefine.platform));
+             foreach(string path in FilePathDefine.loadedPath){
+                var _path = Path.Combine(path, ALG.EncodeHexString(FilePathDefine.platform));
                 if (File.Exists(_path))
                 {
                     var bundleLoadRequest = AssetBundle.LoadFromFile(_path);

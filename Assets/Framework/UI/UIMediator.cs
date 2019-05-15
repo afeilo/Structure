@@ -5,11 +5,6 @@ namespace Assets.Framework
 {
     public class UIMediator : IMediator
     {
-        public override T Get<T>(string name)
-        {
-
-            return default(T);
-        }
         /// <summary>
         /// for index
         /// </summary>
@@ -22,7 +17,9 @@ namespace Assets.Framework
 
         Dictionary<string, object> cache = new Dictionary<string, object>();
 
-        public Object Get(string n)
+        public string relativeMediator;
+
+        public override Object Get(string n)
         {
             int index = names.IndexOf(n);
             if (index == -1)

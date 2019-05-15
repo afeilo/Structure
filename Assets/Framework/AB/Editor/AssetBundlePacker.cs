@@ -12,8 +12,8 @@ public class AssetBundlePacker{
     [MenuItem(menuRoot + "AssetBundle Build &b")]
     public static void BuildAssetBundle()
     {
-        QuickAcessUtils.CheckDirectory(AssetBundlePathDefine.projectExportPath, false);
-        string p = AssetBundlePathDefine.projectExportPath;
+        QuickAcessUtils.CheckDirectory(FilePathDefine.projectExportPath, false);
+        string p = FilePathDefine.projectExportPath;
         BuildTarget bt = EditorUserBuildSettings.activeBuildTarget;
         Debug.Log(p);
         BuildPipeline.BuildAssetBundles(p, babo, bt);
@@ -24,7 +24,7 @@ public class AssetBundlePacker{
         AssetBundleBuild abb = new AssetBundleBuild();
         abb.assetNames = new string[] { path };
         abb.assetBundleName = ALG.EncodeHexString(Path.GetFileNameWithoutExtension(path)) + ".ab";
-        BuildPipeline.BuildAssetBundles(AssetBundlePathDefine.projectExportPath, new AssetBundleBuild[] { abb }, babo, EditorUserBuildSettings.activeBuildTarget);
+        BuildPipeline.BuildAssetBundles(FilePathDefine.projectExportPath, new AssetBundleBuild[] { abb }, babo, EditorUserBuildSettings.activeBuildTarget);
     }
 
     [MenuItem(menuAssetsRoot + "Set AssetBundle Name", false, 1)]

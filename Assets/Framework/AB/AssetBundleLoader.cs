@@ -34,7 +34,7 @@ namespace Assets.Framework
 
         IEnumerator RealLoadAssetBundle(AssetBundleCache abCache)
         {            
-            foreach(string path in AssetBundlePathDefine.loadedPath){
+            foreach(string path in FilePathDefine.loadedPath){
                 var _path = Path.Combine(path, ALG.EncodeBundleName(abCache.Name));
                 if (File.Exists(_path)) {
                     var bundleLoadRequest = AssetBundle.LoadFromFileAsync(_path);

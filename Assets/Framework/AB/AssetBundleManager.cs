@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace Assets.Framework
@@ -10,7 +11,7 @@ namespace Assets.Framework
         private BaseAssetBundleLoader assetBundleLoader;
         private BaseAssetLoader assetLoader;
         private AssetCheckDependency assetDependency;
-        public bool SimulateAssetBundleInEditor = false;
+        public bool SimulateAssetBundleInEditor = true;
         public AssetBundleManager()
         {
             assetBundleLoader = new AssetBundleLoader();
@@ -55,7 +56,7 @@ namespace Assets.Framework
                 AssetTask task = new AssetTask(name[i], (UnityEngine.Object o) =>
                 {
                     objects[i] = o;
-                }, null);
+                },null, null);
                 taskArray[i] = task;
                 RealLoadAsset(task);
             }
@@ -72,9 +73,9 @@ namespace Assets.Framework
 
         }
 
-        public void LoadAsset(string name, Action<UnityEngine.Object> success, Type type = null) 
+        public void LoadAsset(string name, Action<UnityEngine.Object> success, Action error, Type type = null) 
         {
-            AssetTask assetTask = new AssetTask(name, success,type);
+            AssetTask assetTask = new AssetTask(name, success,error,type);
             new Task(RealLoadAsset(assetTask), "AssetBundleManager_"+name);
         }
 
@@ -85,7 +86,7 @@ namespace Assets.Framework
             AssetTask[] taskArray = new AssetTask[dependecies.Length];
             for (int i = 0; i < dependecies.Length; i++)
             {
-                AssetTask task = new AssetTask(dependecies[i], null, null);
+                AssetTask task = new AssetTask(dependecies[i], null,null, null);
                 taskArray[i] = task;
                 new Task(RealLoadAssetBundle(task), "AssetBundleManager_" + task.name);
             }
@@ -117,46 +118,55 @@ namespace Assets.Framework
                 if (null != t && t == typeof(Sprite))
                 {
                     //做精灵加载
-                    //string atlasName = AtlasRelative.instance.GetAtlasName(name);
-                    //if (atlasName != null)
-                    //{
-                    //    string spriteRoot = "Assets/CResource/Sprite/";
-                    //    List<string> files = new List<string>();
-                    //    files.AddRange(Directory.GetFiles(spriteRoot + atlasName, name + ".png", SearchOption.AllDirectories));
-                    //    files.AddRange(Directory.GetFiles(spriteRoot + atlasName, name + ".jpg", SearchOption.AllDirectories));
-                    //    if (files.Count != 1) Debug.LogError("Simulate can not find " + key);
-                    //    if (files.Count > 0)
-                    //    {
-                    //        Object o = UnityEditor.AssetDatabase.LoadAssetAtPath(files[0], t);
-                    //        comp(o);
-                    //    }
-                    //    else
-                    //        error();
-                    //    yield break;
-                    //}
+                    if (assetTask.name != null)
+                    {
+                        string spriteRoot = "Assets/AVG/Res/sprite/";
+                        List<string> files = new List<string>();
+                        files.AddRange(Directory.GetFiles(spriteRoot, assetTask.name + ".png", SearchOption.AllDirectories));
+                        files.AddRange(Directory.GetFiles(spriteRoot, assetTask.name + ".jpg", SearchOption.AllDirectories));
+                        if (files.Count != 1) Debug.LogError("Simulate can not find " + assetTask.name);
+                        if (files.Count > 0)
+                        {
+                            UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath(files[0], t);
+                            assetTask.success(o);
+                        }
+                        else
+                            assetTask.error();
+                        yield break;
+                    }
                 }
-
-
-                //string fn = AssetBundleManager.GetHexABName(key);
-                string[] fns = UnityEditor.AssetDatabase.GetAssetPathsFromAssetBundle(assetTask.name);
-                if (fns.Length != 1) Debug.LogError("Simulate can not find " + assetTask.name);
-                if (fns.Length > 0)
+                else
                 {
-                    UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath(fns[0],typeof(UnityEngine.Object));
+                    //string fn = AssetBundleManager.GetHexABName(key);
+                    //暂时修改方案
+                    UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath("Assets/AVG/Res/prefab/" + assetTask.name + ".prefab", typeof(UnityEngine.Object));
                     assetTask.success(o);
+                    //string[] fns = UnityEditor.AssetDatabase.GetAssetPathsFromAssetBundle(assetTask.name);
+
+                    //if (fns.Length != 1) Debug.LogError("Simulate can not find " + assetTask.name);
+                    //if (fns.Length > 0)
+                    //{
+
+                    //}
+
+                    //else
+                    //    error();
+                    yield break;
                 }
-                //else
-                //    error();
-                yield break;
+
+
+                
             }
-#endif
+#else
             yield return RealLoadAssetBundle(assetTask);
             var abCache = assetBundleLoader.GetAssetBundle(assetTask.name);
             assetLoader.LoadAsset(assetTask.name, abCache.Target, (UnityEngine.Object o) =>
             {
                 assetTask.isFinish = true;
                 assetTask.success(o);
-            }, null);
+            }, null,assetTask.type);
+#endif
+
         }
 
 
@@ -164,11 +174,13 @@ namespace Assets.Framework
             public string name;
             public bool isFinish = false;
             public Action<UnityEngine.Object> success;
+            public Action error;
             public Type type;
-            public AssetTask(string name, Action<UnityEngine.Object> success,Type type)
+            public AssetTask(string name, Action<UnityEngine.Object> success, Action error, Type type)
             {
                 this.name = name;
                 this.success = success;
+                this.error = error;
                 this.type = type;
                 isFinish = false;
             }

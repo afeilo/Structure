@@ -5,6 +5,10 @@ namespace Assets.Framework
 {
     public abstract class IMediator : MonoBehaviour
     {
-        public abstract T Get<T>(string name);
+        public abstract Object Get(string name);
+        public void bind(object obj)
+        {
+            FAM.bind(obj, this);
+        }
     }
 }

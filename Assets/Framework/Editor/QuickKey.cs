@@ -16,4 +16,19 @@ public class QuickKey : Editor
             selectObjs[i].SetActive(!isAcitve);
         }
     }
+
+    //快捷键控制保存Prefab alt + s
+    [MenuItem("Tools/Custom/Apply GameObject &s")]
+    public static void ApplyPrefab()
+    {
+        GameObject go = Selection.activeGameObject;
+        if (go == null) return;
+        PrefabType type = PrefabUtility.GetPrefabType(go);
+        if (type == PrefabType.PrefabInstance)
+        {
+            Object target = PrefabUtility.GetCorrespondingObjectFromSource(go);
+            PrefabUtility.ReplacePrefab(go, target, ReplacePrefabOptions.ConnectToPrefab);
+        }
+
+    }
 }
