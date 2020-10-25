@@ -6,17 +6,32 @@ using UnityEngine;
 
 namespace Assets.Framework
 {
-    public class AssetBundleManager : Singleton<AssetBundleManager>
+    public sealed class AssetBundleManager : MonoBehaviour
     {
-        private BaseAssetBundleLoader assetBundleLoader;
-        private BaseAssetLoader assetLoader;
-        private AssetCheckDependency assetDependency;
-        public bool SimulateAssetBundleInEditor = true;
-        public AssetBundleManager()
+
+        private static AssetBundleManager instance;
+        public static AssetBundleManager getInstance()
         {
-            assetBundleLoader = new AssetBundleLoader();
-            assetLoader = new AssetLoader();
-            assetDependency = new AssetCheckDependency();
+            if (instance == null)
+            {
+                GameObject go = new GameObject("AssetBundleManager");
+                instance = go.AddComponent<AssetBundleManager>();
+                instance.Init();
+            }
+            return instance;
+        }
+
+        private BaseAssetBundleLoader _assetBundleLoader;
+        private BaseAssetLoader _assetLoader;
+        private AssetCheckDependency _assetDependency;
+
+        private List<BaseAssetBundleLoader.AssetBundleCache> releaseList =
+            new List<BaseAssetBundleLoader.AssetBundleCache>();
+        public void Init()
+        {
+            _assetBundleLoader = new AssetBundleLoader();
+            _assetLoader = new AssetLoader();
+            _assetDependency = new AssetCheckDependency();
         }
 
         public void LoadAssetGroup(string[] name, Action<UnityEngine.Object[]> comp) {
@@ -31,36 +46,35 @@ namespace Assets.Framework
         {
 
             name = ALG.DecodeBundleName(name);
-            string[] dependecies = assetDependency.GetDependencies(ALG.EncodeBundleName(name));
-            for (int i = 0; i < dependecies.Length; i++)
+            string[] dependencies = _assetDependency.GetDependencies(ALG.EncodeBundleName(name));
+            for (int i = 0; i < dependencies.Length; i++)
             {
-                RealUnloadAssetWithName(dependecies[i]);
+                RealUnloadAssetWithName(dependencies[i]);
             }
-            var abCache = assetBundleLoader.GetAssetBundle(name);
+            var abCache = _assetBundleLoader.GetAssetBundle(name);
+            if (null == abCache) return;
             abCache.RemoveReference();
-            if (0 >= abCache.ReferencesCount) {
-                assetBundleLoader.UnloadAssetBundle(name);
-                assetLoader.UnloadAsset(name);
-                Debug.Log("UnloadAssetBundle  "+name);
-                abCache.Target.Unload(true);
+            if (0 >= abCache.ReferencesCount)
+            {
+                releaseList.Add(abCache);
             }
             
         }
 
         IEnumerator RealLoadAssetGroup(string[] name, Action<UnityEngine.Object[]> comp)
         {
-            AssetTask[] taskArray = new AssetTask[name.Length];
-            UnityEngine.Object[] objects = new UnityEngine.Object[name.Length];
-            for (int i = 0; i < name.Length; i++)
+            var taskArray = new AssetTask[name.Length];
+            var objects = new UnityEngine.Object[name.Length];
+            for (var i = 0; i < name.Length; i++)
             {
-                AssetTask task = new AssetTask(name[i], (UnityEngine.Object o) =>
+                var task = new AssetTask(name[i], name[i], (UnityEngine.Object o) =>
                 {
                     objects[i] = o;
                 },null, null);
                 taskArray[i] = task;
                 RealLoadAsset(task);
             }
-            int j = 0;
+            var j = 0;
             while (j < taskArray.Length)
             {
                 if (taskArray[j].isFinish)
@@ -75,22 +89,28 @@ namespace Assets.Framework
 
         public void LoadAsset(string name, Action<UnityEngine.Object> success, Action error, Type type = null) 
         {
-            AssetTask assetTask = new AssetTask(name, success,error,type);
+            AssetTask assetTask = new AssetTask(name,name, success,error,type);
             new Task(RealLoadAsset(assetTask), "AssetBundleManager_"+name);
+        }
+
+        public void LoadAsset(string name,string abName, Action<UnityEngine.Object> success, Action error, Type type = null)
+        {
+            AssetTask assetTask = new AssetTask(name, abName, success, error, type);
+            new Task(RealLoadAsset(assetTask), "AssetBundleManager_" + name);
         }
 
         IEnumerator RealLoadAssetBundle(AssetTask assetTask)
         {
-            assetTask.name = ALG.DecodeBundleName(assetTask.name);
-            string[] dependecies = assetDependency.GetDependencies(ALG.EncodeBundleName(assetTask.name));
-            AssetTask[] taskArray = new AssetTask[dependecies.Length];
-            for (int i = 0; i < dependecies.Length; i++)
+            assetTask.abName = ALG.DecodeBundleName(assetTask.abName);
+            var dependencies = _assetDependency.GetDependencies(ALG.EncodeBundleName(assetTask.abName));
+            var taskArray = new AssetTask[dependencies.Length];
+            for (var i = 0; i < dependencies.Length; i++)
             {
-                AssetTask task = new AssetTask(dependecies[i], null,null, null);
+                var task = new AssetTask(dependencies[i],null, null,null, null);
                 taskArray[i] = task;
-                new Task(RealLoadAssetBundle(task), "AssetBundleManager_" + task.name);
+                new Task(RealLoadAssetBundle(task), "AssetBundleManager_" + task.abName);
             }
-            int j = 0;
+            var j = 0;
             while (j < taskArray.Length)
             {
                 if (taskArray[j].isFinish)
@@ -98,9 +118,9 @@ namespace Assets.Framework
                 else
                     yield return null;
             }
-            assetBundleLoader.LoadAssetBundle(assetTask.name, (AssetBundle ab) =>
+            _assetBundleLoader.LoadAssetBundle(assetTask.abName, (AssetBundle ab) =>
             {
-                assetBundleLoader.GetAssetBundle(assetTask.name).AddReference();
+                _assetBundleLoader.GetAssetBundle(assetTask.abName).AddReference();
                 assetTask.isFinish = true;
             }, null);
             while (!assetTask.isFinish)
@@ -108,23 +128,25 @@ namespace Assets.Framework
                 yield return null;
             }
         }
+
+
         IEnumerator RealLoadAsset(AssetTask assetTask) 
         {
 #if UNITY_EDITOR
-            if (SimulateAssetBundleInEditor)
+            if (Config.simulateAssetBundleInEditor)
             {
                 yield return new WaitForSeconds(UnityEngine.Random.Range(0.01f, 0.03f));//模拟加载时间
                 var t = assetTask.type;
                 if (null != t && t == typeof(Sprite))
                 {
                     //做精灵加载
-                    if (assetTask.name != null)
+                    if (assetTask.abName != null)
                     {
-                        string spriteRoot = "Assets/AVG/Res/sprite/";
+                        string spriteRoot = Config.spritePath;
                         List<string> files = new List<string>();
-                        files.AddRange(Directory.GetFiles(spriteRoot, assetTask.name + ".png", SearchOption.AllDirectories));
-                        files.AddRange(Directory.GetFiles(spriteRoot, assetTask.name + ".jpg", SearchOption.AllDirectories));
-                        if (files.Count != 1) Debug.LogError("Simulate can not find " + assetTask.name);
+                        files.AddRange(Directory.GetFiles(spriteRoot + assetTask.abName + "/", assetTask.assetName + ".png", SearchOption.AllDirectories));
+                        files.AddRange(Directory.GetFiles(spriteRoot + assetTask.abName + "/", assetTask.assetName  + ".jpg", SearchOption.AllDirectories));
+                        if (files.Count != 1) Debug.LogError("Simulate can not find " + assetTask.assetName);
                         if (files.Count > 0)
                         {
                             UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath(files[0], t);
@@ -139,7 +161,7 @@ namespace Assets.Framework
                 {
                     //string fn = AssetBundleManager.GetHexABName(key);
                     //暂时修改方案
-                    UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath("Assets/AVG/Res/prefab/" + assetTask.name + ".prefab", typeof(UnityEngine.Object));
+                    UnityEngine.Object o = UnityEditor.AssetDatabase.LoadAssetAtPath(Config.prefabPath + assetTask.abName + ".prefab", typeof(UnityEngine.Object));
                     assetTask.success(o);
                     //string[] fns = UnityEditor.AssetDatabase.GetAssetPathsFromAssetBundle(assetTask.name);
 
@@ -153,32 +175,51 @@ namespace Assets.Framework
                     //    error();
                     yield break;
                 }
-
-
-                
             }
-#else
+                
+#endif
             yield return RealLoadAssetBundle(assetTask);
-            var abCache = assetBundleLoader.GetAssetBundle(assetTask.name);
-            assetLoader.LoadAsset(assetTask.name, abCache.Target, (UnityEngine.Object o) =>
+            var abCache = _assetBundleLoader.GetAssetBundle(assetTask.abName);
+            _assetLoader.LoadAsset(assetTask.assetName, abCache.Target, (UnityEngine.Object o) =>
             {
                 assetTask.isFinish = true;
                 assetTask.success(o);
             }, null,assetTask.type);
-#endif
 
+        }
+
+        void LateUpdate()
+        {
+            for (int i = releaseList.Count - 1; i >= 0; i--)
+            {
+                var abCache = releaseList[i];
+                if (!abCache.isLock)
+                {
+                    if (abCache.ReferencesCount <= 0)
+                    {
+                        _assetBundleLoader.UnloadAssetBundle(abCache.Name);
+                        _assetLoader.UnloadAsset(abCache.Name);
+                        abCache.Target.Unload(true);
+                    }
+                    releaseList.RemoveAt(i);
+                }
+                
+            }
+            
         }
 
 
         public class AssetTask {
-            public string name;
+            public string abName;
+            public string assetName;
             public bool isFinish = false;
             public Action<UnityEngine.Object> success;
             public Action error;
             public Type type;
-            public AssetTask(string name, Action<UnityEngine.Object> success, Action error, Type type)
+            public AssetTask(string abName,string assetName, Action<UnityEngine.Object> success, Action error, Type type)
             {
-                this.name = name;
+                this.abName = abName;
+                this.assetName = assetName;
                 this.success = success;
                 this.error = error;
                 this.type = type;

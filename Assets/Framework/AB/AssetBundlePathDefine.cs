@@ -47,6 +47,7 @@ public class FilePathDefine
     {
         get
         {
+            Debug.Log("Application.streamingAssetsPath  " + Directory.Exists(Application.streamingAssetsPath));
             if (_projectExportPath == null)
                 _projectExportPath = Path.Combine(Application.streamingAssetsPath, platformHexName);
             return _projectExportPath;

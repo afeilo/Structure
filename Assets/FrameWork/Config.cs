@@ -6,6 +6,6 @@
         public static string spritePath = "Assets/Res/Sprite/";
 
         //是否使用模拟模式加载资源
-        public static bool simulateAssetBundleInEditor = true;
+        public static bool simulateAssetBundleInEditor = false;
     }
 }

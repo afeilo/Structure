@@ -8,26 +8,25 @@ using UnityEngine;
 
 namespace Assets.Framework
 {
-    class AssetCheckDependency : ICheckDependency
+    sealed class AssetCheckDependency : ICheckDependency
     {
-        Dictionary<string,DependecyInfo> dependenacies = new Dictionary<string,DependecyInfo>();
-        private AssetBundleManifest abManifest;
+        private AssetBundleManifest _abManifest;
         public AssetCheckDependency() {
 
-            loadManifest();
+            LoadManifest();
         }
         /// <summary>
         /// 加载manifest
         /// </summary>
-        private void loadManifest()
+        private void LoadManifest()
         {
              foreach(string path in FilePathDefine.loadedPath){
                 var _path = Path.Combine(path, ALG.EncodeHexString(FilePathDefine.platform));
                 if (File.Exists(_path))
                 {
                     var bundleLoadRequest = AssetBundle.LoadFromFile(_path);
-                    abManifest = bundleLoadRequest.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-                    Debug.Log(abManifest);
+                    _abManifest = bundleLoadRequest.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                    Debug.Log(_abManifest);
                     return;
                 }
              }
@@ -48,34 +47,11 @@ namespace Assets.Framework
         /// <param name="name"></param>
         /// <returns></returns>
         public string[] GetDependencies(string name) {
-            if (null == abManifest)
+            if (null == _abManifest)
                 return new string[0];
-            return abManifest.GetAllDependencies(name);
+            return _abManifest.GetAllDependencies(name);
         }
-
-        /// <summary>
-        /// 依賴信息
-        /// </summary>
-        public class DependecyInfo
-        {
-            /// <summary>
-            /// 資源名
-            /// </summary>
-            public string name;
-            /// <summary>
-            /// 依賴列表
-            /// </summary>
-            public string[] dependencies;
-            public DependecyInfo(string name)
-                : this(name, null)
-            {
-            }
-            public DependecyInfo(string name, string[] dependencies)
-            {
-                this.name = name;
-                this.dependencies = dependencies;
-            }
-        }
+        
     }
 
 }

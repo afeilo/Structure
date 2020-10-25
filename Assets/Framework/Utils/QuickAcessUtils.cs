@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 public static class QuickAcessUtils
@@ -133,6 +134,27 @@ public static class QuickAcessUtils
                 srcList.Add(elem);
         }
     }
+
+#if UNITY_EDITOR
+    public static List<T> LoadAssetsAtPath<T>(string path) where T : UnityEngine.Object
+    {
+        List<T> list = new List<T>();
+        if (Directory.Exists(path))
+        {
+            string[] files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+            for (int i = 0; i < files.Length; i++)
+            {
+                File.Delete(files[i]);
+                var s = AssetDatabase.LoadAssetAtPath(files[i], typeof(T));
+                if (null != s)
+                    list.Add(s as T);
+            }
+        }
+        return list;
+
+    }
+#endif
+
 }
 
 public interface ICouldEqual

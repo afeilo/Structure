@@ -11,7 +11,7 @@ namespace Assets.Framework
         }
         public override void Start()
         {
-
+            FAM.bind(this, mediator);
         }
 
         // Use this for initialization

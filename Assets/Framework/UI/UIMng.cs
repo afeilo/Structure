@@ -28,7 +28,7 @@ namespace Assets.Framework
                 Debug.LogError("type is not BaseController");
                 return;
             }
-            BaseController c = (TestController)Activator.CreateInstance(t);
+            BaseController c = (BaseController)Activator.CreateInstance(t);
             IState.LoadMediator(c,()=>{
                 IState.EnableMediator(c);
             });
@@ -36,6 +36,7 @@ namespace Assets.Framework
 
         public void Goto(string name)
         {
+            Debug.Log("Goto "+name);
             Goto(Type.GetType(name));
         }
 
@@ -45,6 +46,7 @@ namespace Assets.Framework
         /// <param name="name"></param>
         public void Goto(Type t)
         {
+
             if (!t.IsSubclassOf(typeof(BaseController)))
             {
                 Debug.LogError("type is not BaseController");

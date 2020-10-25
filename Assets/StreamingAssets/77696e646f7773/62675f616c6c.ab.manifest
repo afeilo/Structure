@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 2897229554
+CRC: 4097120032
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: d57aa01dd6a1e3ac67ac402a167dc2da
+    Hash: 35903297a3609e9b241cd13a51b6604a
   TypeTreeHash:
     serializedVersion: 2
-    Hash: ea5a42e0fd8ea905efa7aa926a3b8944
+    Hash: 9e6ad29cbd2df8fbe1a15315db0e51ab
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -14,5 +14,5 @@ ClassTypes:
 - Class: 213
   Script: {instanceID: 0}
 Assets:
-- Assets/Framework/Test/bg_all.jpg
+- Assets/Test/bg_all.jpg
 Dependencies: []

@@ -11,6 +11,11 @@ namespace Assets.Framework
             AssetBundleManager.getInstance().LoadAsset(name, comp,error, type);
         }
 
+        public static void LoadAsset(string name, string assetName, Action<UnityEngine.Object> comp, Action error, Type type = null)
+        {
+            AssetBundleManager.getInstance().LoadAsset(name, assetName, comp, error, type);
+        }
+
         public static void LoadAssetGroup(string[] names,Action<UnityEngine.Object[]> comp){
             AssetBundleManager.getInstance().LoadAssetGroup(names, comp);
         }

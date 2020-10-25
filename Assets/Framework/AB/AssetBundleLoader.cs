@@ -34,18 +34,20 @@ namespace Assets.Framework
 
         IEnumerator RealLoadAssetBundle(AssetBundleCache abCache)
         {            
-            foreach(string path in FilePathDefine.loadedPath){
-                var _path = Path.Combine(path, ALG.EncodeBundleName(abCache.Name));
-                if (File.Exists(_path)) {
-                    var bundleLoadRequest = AssetBundle.LoadFromFileAsync(_path);
-                    yield return bundleLoadRequest;
-                    var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
-                    abCache.Target = myLoadedAssetBundle;
-                    abCache.LoadAssetSuccessCallback(myLoadedAssetBundle);
-                    abCache.isLock = false;
-                    break;
-                }
+
+            //foreach(string path in FilePathDefine.loadedPath){
+            var paths = FilePathDefine.loadedPath;
+            var _path = Path.Combine(paths[0], ALG.EncodeBundleName(abCache.Name));
+            if (!File.Exists(_path)) {
+                _path = Path.Combine(paths[1], ALG.EncodeBundleName(abCache.Name));
             }
+            var bundleLoadRequest = AssetBundle.LoadFromFileAsync(_path);
+            yield return bundleLoadRequest;
+            var myLoadedAssetBundle = bundleLoadRequest.assetBundle;
+            abCache.Target = myLoadedAssetBundle;
+            abCache.LoadAssetSuccessCallback(myLoadedAssetBundle);
+            abCache.isLock = false;
+            //}
         }
 
        
